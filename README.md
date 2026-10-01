@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Yoga Amanda — Portfolio
 
-## Getting Started
+Website portfolio Yoga Amanda (Next.js 16, Tailwind 4, Motion) dengan palet **Amber Crown**, plus panel admin untuk mengubah konten. Data disimpan di **Neon** (PostgreSQL via Prisma 7) dan file upload di **Neon Storage** (S3-compatible).
 
-First, run the development server:
+## Menjalankan
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install                  # juga menjalankan `prisma generate`
+cp .env.example .env.local   # lalu isi nilainya
+npm run db:deploy            # buat tabel di database (sekali, dan tiap ada migrasi baru)
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Admin: `http://localhost:3000/admin`. Login pakai `ADMIN_USERNAME` / `ADMIN_PASSWORD` dari `.env.local`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Variabel | Keterangan |
+| --- | --- |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD` | Akun admin (sementara hardcoded di env) |
+| `AUTH_SECRET` | Kunci tanda tangan cookie session, minimal 32 karakter acak |
+| `DATABASE_URL` | Connection string Neon (pakai yang **Pooled**) |
+| `AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `S3_BUCKET` | Object storage S3-compatible (Neon Storage, atau R2 nanti) |
+| `S3_PUBLIC_URL` | Opsional, hanya kalau bucket publik (mis. R2 + custom domain) |
+| `STORAGE_DIR` | Opsional. Folder upload lokal saat storage belum diisi. Default `./storage` |
+| `YOUTUBE_API_KEY` | Opsional. YouTube Data API v3 (gratis) untuk jumlah subscriber yang lebih stabil |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Media
 
-## Learn More
+File mentah ada di `public/assets/`. Versi yang dipakai website ada di `public/media/`, dibuat oleh:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run media          # hanya memproses file yang berubah
+npm run media -- --force
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Video 21:9 di-encode ulang (H.264 CRF 20, visually lossless): 63MB → ~27MB, resolusi dan 60fps tetap. Ada juga versi 1280px (~8MB) untuk HP.
+- Short video hanya di-remux (tanpa re-encode, jadi kualitas tidak turun) dengan `faststart`, supaya bisa langsung diputar sebelum file selesai diunduh.
+- Poster WebP dan gambar WebP kualitas 90.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Upload dari admin dioptimalkan otomatis: gambar dikonversi ke WebP kualitas 90 (GIF jadi WebP animasi), dan video dibuatkan poster dari frame-nya. Video tidak diproses ulang di server; kalau MP4 belum "fast start", admin akan memberi peringatan (aktifkan opsi *Fast Start / Web Optimized* saat export).
 
-## Deploy on Vercel
+`public/assets/` tidak dipakai oleh website. Folder ini boleh dipindah ke luar `public/` supaya tidak ikut ter-deploy (sesuaikan `SRC` di `scripts/optimize-media.mjs`).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Jumlah pengikut
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Diatur di **Admin → Bukti & pengikut**. Tiap platform (TikTok, Instagram, YouTube) cukup diisi username-nya, lalu pilih:
+
+- **Otomatis**: angka dibaca dari profil publik tanpa API berbayar. YouTube memakai YouTube Data API kalau `YOUTUBE_API_KEY` diisi, kalau tidak dari halaman channel. TikTok dan Instagram dari data profil publiknya. Hasilnya disimpan di database (baris `followers:snapshot`) dan diperbarui di latar belakang tiap ±6 jam (halaman utama di-regenerate tiap 6 jam). Tombol *Ambil angka sekarang* membaca ulang saat itu juga.
+- **Manual**: angka yang diketik selalu dipakai.
+
+Di mode Otomatis, angka manual jadi cadangan selama pembacaan belum berhasil. Instagram dan TikTok bisa sewaktu-waktu membatasi request dari server; kalau itu terjadi, admin menampilkan pesan errornya dan website tetap memakai angka terakhir yang berhasil (atau angka manual).
+
+## Database (Prisma + Neon)
+
+- Schema: `prisma/schema.prisma`. Tabel `SiteSection` (satu baris per bagian website, isinya JSON yang divalidasi zod di `lib/content/schema.ts`) dan `Message` (pesan dari form kontak).
+- Client di-generate ke `lib/generated/prisma` (tidak di-commit).
+- Ubah schema → `npm run db:migrate` (membuat migrasi baru) → commit folder `prisma/migrations`.
+- Lihat isi database: `npm run db:studio`.
+- Bagian yang belum pernah disimpan dari admin memakai isi default dari `lib/content/defaults.ts`. Tanpa `DATABASE_URL`, website tetap tampil dengan isi default, tapi admin tidak bisa menyimpan.
+
+## Object storage
+
+Upload memakai alur `sign → PUT → finalize`. Browser meng-upload file **langsung ke bucket** lewat signed URL (berlaku 15 menit), jadi video besar tidak melewati server. Setelah itu server mengonversi gambar ke WebP.
+
+- **Neon Storage** bucket-nya private, jadi file disajikan lewat `/files/<key>` di website ini. Route ini mendukung Range request (video bisa di-seek) dan cache 1 tahun.
+- **Pindah ke Cloudflare R2 nanti:** ganti `AWS_ENDPOINT_URL_S3` ke `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`, `AWS_REGION=auto`, kredensial dan bucket R2. Kalau bucket punya domain publik, isi `S3_PUBLIC_URL` lalu build ulang, supaya file diambil langsung dari CDN Cloudflare. Pindahkan juga file yang sudah ada dari bucket lama.
+- CORS bucket harus mengizinkan `PUT` dari domain website (bucket Neon saat ini sudah mengizinkan semua origin).
+- Tanpa kredensial storage, file disimpan di `./storage/uploads` (untuk development).

@@ -1,26 +1,316 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ───────────────────────── Amber Crown tokens ───────────────────────── */
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #070605;
+  --bg2: #0e0b08;
+  --surface: #15110d;
+  --surface-2: #1c1711;
+  --nav-bg: rgba(21, 17, 13, 0.72);
+  --line: #2c241b;
+  --line-strong: #43372a;
+  --ink: #f4ecdf;
+  --muted: #ab9e8b;
+  --gold: #e3a04b;
+  --gold-text: #e3a04b;
+  --gold-hi: #f8d293;
+  --gold-lo: #a5601e;
+  --gold-pale: #fff4dc;
+  --on-gold: #1b1207;
+  --glow: rgba(227, 160, 75, 0.16);
+  --glow-strong: rgba(227, 160, 75, 0.45);
+  --tint: rgba(227, 160, 75, 0.1);
+  --shadow: rgba(0, 0, 0, 0.55);
+  --grain-opacity: 0.05;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #fcfaf7;
+  --bg2: #f4eee5;
+  --surface: #ffffff;
+  --surface-2: #faf6f0;
+  --nav-bg: rgba(255, 255, 255, 0.78);
+  --line: #e6dccd;
+  --line-strong: #d6c6ae;
+  --ink: #17120c;
+  --muted: #6b5f50;
+  --gold: #d8963f;
+  --gold-text: #96591a;
+  --gold-hi: #f6cf8c;
+  --gold-lo: #9a5a1c;
+  --gold-pale: #fff1d6;
+  --on-gold: #1b1207;
+  --glow: rgba(227, 160, 75, 0.22);
+  --glow-strong: rgba(216, 150, 63, 0.4);
+  --tint: rgba(216, 150, 63, 0.12);
+  --shadow: rgba(80, 52, 18, 0.18);
+  --grain-opacity: 0.035;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-bg2: var(--bg2);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-gold: var(--gold);
+  --color-gold-text: var(--gold-text);
+  --color-gold-hi: var(--gold-hi);
+  --color-gold-lo: var(--gold-lo);
+  --color-on-gold: var(--on-gold);
+  --color-tint: var(--tint);
+  --font-sans: var(--font-montserrat), "Helvetica Neue", Arial, sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, serif;
+  --ease-lux: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ───────────────────────── Base ───────────────────────── */
+
+@layer base {
+  html {
+    background: var(--bg);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--gold);
+    color: var(--on-gold);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+    border-radius: 8px;
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ───────────────────────── Custom scrolling ─────────────────────────
+   The native page scrollbar is hidden; Lenis drives inertia scrolling and
+   <CustomScrollbar /> draws the rail. */
+
+html {
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* Inner scroll areas: a slim scrollbar instead of the OS default. */
+@layer utilities {
+  .scroll-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+  .scroll-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scroll-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scroll-thin::-webkit-scrollbar-thumb {
+    background: var(--line-strong);
+    border-radius: 99px;
+  }
+  .scroll-none {
+    scrollbar-width: none;
+  }
+  .scroll-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ───────────────────────── Theme transition ─────────────────────────
+   A feathered circle grows from the toggle (View Transitions API). Browsers
+   without it get a cross-fade of colors instead. */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2;
+  mask-image: radial-gradient(closest-side, #000 72%, transparent 100%);
+  mask-repeat: no-repeat;
+  /* Hidden until the scripted reveal starts. Without this the new theme covers the
+     screen for a frame before the circle begins growing (the "blink"). */
+  mask-size: 0 0;
+}
+
+/* While the new snapshot is live, color transitions would replay old→new inside
+   the circle, so they are switched off for the length of the switch. */
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
+}
+
+html.theme-fade,
+html.theme-fade *,
+html.theme-fade *::before,
+html.theme-fade *::after {
+  transition:
+    background-color 0.7s var(--ease-lux),
+    color 0.7s var(--ease-lux),
+    border-color 0.7s var(--ease-lux),
+    fill 0.7s var(--ease-lux),
+    stroke 0.7s var(--ease-lux),
+    box-shadow 0.7s var(--ease-lux) !important;
+}
+
+@layer components {
+  /* ───────────────────────── Ambience ───────────────────────── */
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+
+  /* ───────────────────────── Falling kit parts ─────────────────────────
+     Runner pieces, nubs, polycaps and screws drift down behind the content. The
+     layer is masked so pieces fade to a whisper while they cross the text column
+     and only read clearly in the side gutters. */
+
+  @keyframes part-fall {
+    from {
+      transform: translate3d(0, -12vh, 0);
+    }
+    to {
+      transform: translate3d(0, 112vh, 0);
+    }
+  }
+  @keyframes part-sway {
+    from {
+      transform: translateX(-0.6em) rotate(-9deg);
+    }
+    to {
+      transform: translateX(0.6em) rotate(9deg);
+    }
+  }
+  @keyframes part-tumble {
+    to {
+      transform: rotate3d(var(--tx), var(--ty), 0.15, 360deg);
+    }
+  }
+
+  .parts {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    contain: strict;
+    mask-image: linear-gradient(
+      90deg,
+      #000 calc(50% - 580px),
+      rgb(0 0 0 / 0.16) calc(50% - 450px),
+      rgb(0 0 0 / 0.16) calc(50% + 450px),
+      #000 calc(50% + 580px)
+    );
+  }
+  @media (max-width: 767px) {
+    /* No gutters on phones: the whole layer stays quiet. */
+    .parts {
+      mask-image: none;
+      opacity: 0.3;
+    }
+  }
+  .part {
+    position: absolute;
+    top: 0;
+    will-change: transform;
+  }
+
+  /* ───────────────────────── Buttons ─────────────────────────
+     Gold is flat. Only the primary CTA (.btn-cta) carries a glow. */
+
+  .btn-gold {
+    position: relative;
+    background-color: var(--gold);
+    color: var(--on-gold);
+    transition:
+      background-color 0.4s var(--ease-lux),
+      box-shadow 0.5s var(--ease-lux);
+  }
+  .btn-gold:hover {
+    background-color: color-mix(in oklab, var(--gold) 88%, var(--ink));
+  }
+  .btn-cta {
+    box-shadow: 0 8px 28px -10px var(--glow-strong);
+  }
+  .btn-cta:hover {
+    box-shadow: 0 10px 36px -8px var(--glow-strong);
+  }
+
+  .btn-ghost {
+    position: relative;
+    border: 1px solid var(--line);
+    transition:
+      border-color 0.4s var(--ease-lux),
+      color 0.4s var(--ease-lux),
+      background-color 0.4s var(--ease-lux);
+  }
+  .btn-ghost:hover {
+    border-color: var(--line-strong);
+    background-color: var(--surface-2);
+  }
+}
+
+/* ───────────────────────── Motion preferences ───────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .part,
+  .part * {
+    animation: none !important;
+  }
+  /* Parts rest where they are, scattered, instead of falling. */
+  .part {
+    transform: translate3d(0, var(--rest), 0);
+  }
 }

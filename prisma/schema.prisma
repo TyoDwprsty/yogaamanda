@@ -1,0 +1,31 @@
+// Content and messages. Media files live in object storage (Cloudflare R2), not here.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// One row per editable section of the site ("profile", "video", ...).
+/// `data` is validated with the zod schemas in lib/content/schema.ts.
+model SiteSection {
+  key       String   @id
+  data      Json
+  updatedAt DateTime @updatedAt
+}
+
+/// Messages sent through the contact form.
+model Message {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String   @default("")
+  email     String
+  note      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt(sort: Desc)])
+}
