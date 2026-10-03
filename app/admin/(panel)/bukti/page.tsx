@@ -17,8 +17,8 @@ export default async function Page() {
   return (
     <>
       <PageHeader
-        title="Pengikut & pembicara"
-        description={`Angka pengikut tepat di bawah bagian paling atas, dan daftar “${content.proof.eventsHeading}” setelah Content Media.`}
+        title="Pengikut"
+        description="Angka pengikut tepat di bawah bagian paling atas website."
       />
       <ProofEditor initial={proof} snapshot={snapshot} />
     </>

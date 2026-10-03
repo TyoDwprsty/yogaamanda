@@ -3,11 +3,10 @@
 import { useState, useTransition } from "react";
 import { refreshFollowers } from "@/app/admin/actions";
 import { ArrowUpRightIcon, SOCIAL_ICONS } from "@/components/icons";
-import type { FollowerAccount, SiteContent, SpeakingEvent } from "@/lib/content/schema";
+import type { FollowerAccount, SiteContent } from "@/lib/content/schema";
 import { COUNT_NOUN, PLATFORM_NAME, formatDate, formatFull, normalizeHandle, profileUrl } from "@/lib/followers/shared";
 import type { FollowerSnapshot } from "@/lib/followers/store";
 import { Card, NumberField, Segmented, TextField, Toggle } from "./fields";
-import { ListEditor, newId } from "./list-editor";
 import { SaveBar, useSectionEditor } from "./use-section-editor";
 
 const HANDLE_HINT: Record<FollowerAccount["platform"], string> = {
@@ -156,41 +155,6 @@ export function ProofEditor({ initial, snapshot: initialSnapshot }: { initial: S
           </p>
         </Card>
 
-        <Card
-          title="Daftar event pembicara"
-          description="Daftar tahun + nama event di antara Content Media dan bagian alat. Urutan di sini = urutan di website; taruh yang terbaru di atas. Kosongkan daftar untuk menyembunyikan bagian ini."
-        >
-          <TextField label="Judul bagian" value={d.eventsHeading} onChange={(eventsHeading) => set({ eventsHeading })} />
-          <ListEditor<SpeakingEvent>
-            items={d.events}
-            onChange={(events) => set({ events })}
-            max={30}
-            addLabel="Tambah event"
-            create={() => ({ id: newId(), year: String(new Date().getFullYear()), name: "", detail: "", url: "" })}
-            itemLabel={(e, i) => e.name || `Event ${i + 1}`}
-            renderItem={(e, update, i) => (
-              <>
-                <div className="grid gap-4 md:grid-cols-[120px_1fr]">
-                  <TextField label="Tahun" value={e.year} onChange={(year) => update({ year })} />
-                  <TextField label="Nama event" value={e.name} onChange={(name) => update({ name })} error={ed.issue(`events.${i}.name`)} />
-                </div>
-                <TextField
-                  label="Keterangan"
-                  value={e.detail}
-                  onChange={(detail) => update({ detail })}
-                  placeholder="Penyelenggara · kota, atau topik yang dibawakan"
-                />
-                <TextField
-                  label="Link (opsional)"
-                  value={e.url}
-                  onChange={(url) => update({ url })}
-                  placeholder="https://"
-                  error={ed.issue(`events.${i}.url`)}
-                />
-              </>
-            )}
-          />
-        </Card>
       </div>
       <SaveBar dirty={ed.dirty} pending={ed.pending} result={ed.result} onSave={ed.save} onReset={ed.reset} />
     </>

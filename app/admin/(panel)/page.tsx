@@ -16,10 +16,10 @@ export default async function AdminHome() {
   ];
 
   // Listed in page order. The quoted text is what the section currently says on the site.
-  const { profile, proof, video, contentMedia, tools, contact } = content;
+  const { profile, video, contentMedia, tools, contact } = content;
   const sections = [
     { href: "/admin/profil", title: "Profil", text: `Paling atas: “${profile.tagline || profile.name}”, foto, media sosial` },
-    { href: "/admin/bukti", title: "Pengikut & pembicara", text: `Angka pengikut dan “${proof.eventsHeading}”` },
+    { href: "/admin/bukti", title: "Pengikut", text: "Angka TikTok, Instagram, YouTube di bawah hero" },
     { href: "/admin/video", title: "Video", text: `“${video.main.title || video.heading}”, video utama dan short` },
     { href: "/admin/konten", title: "Content Media", text: `“${contentMedia.heading}”: kanal, foto/GIF/video` },
     { href: "/admin/tools", title: "Alat & studio", text: `“${tools.heading}”: ${tools.tabs.map((t) => t.label).join(", ")}` },

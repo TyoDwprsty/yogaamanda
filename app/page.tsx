@@ -4,7 +4,7 @@ import { ContentMedia } from "@/components/site/content-media";
 import { Footer } from "@/components/site/footer";
 import { Hero } from "@/components/site/hero";
 import { Nav } from "@/components/site/nav";
-import { FollowerBand, TrackRecord } from "@/components/site/proof";
+import { FollowerBand } from "@/components/site/proof";
 import { Tools } from "@/components/site/tools";
 import { VideoSection } from "@/components/site/video-section";
 import { getContent } from "@/lib/content/store";
@@ -30,7 +30,6 @@ export default async function Home() {
         <FollowerBand stats={followers} />
         <VideoSection video={content.video} />
         <ContentMedia content={content.contentMedia} />
-        <TrackRecord proof={content.proof} />
         <Tools tools={content.tools} />
         <Contact contact={content.contact} socials={content.profile.socials} />
       </main>

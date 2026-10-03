@@ -7,8 +7,12 @@ import type { CSSProperties, ReactNode } from "react";
 // mobile count are hidden on small screens; see .parts in globals.css for the safe zone
 // over the text column and the reduced-motion fallback.
 
-const DESKTOP = 24;
-const MOBILE = 10;
+// Pieces read clearly only in the side gutters (the mask fades the text column), so each
+// gutter gets a fixed share instead of whatever the dice give; the rest drift faintly in
+// the middle.
+const PER_GUTTER = 6;
+const DESKTOP = 26;
+const MOBILE = 12;
 
 const F = "var(--gold)";
 const D = "var(--gold-lo)";
@@ -149,9 +153,22 @@ function pick(r: number) {
 
 type Piece = { shape: Shape; fall: CSSProperties; sway: CSSProperties; tumble: CSSProperties; angle: number };
 
+type Zone = "left" | "right" | "middle";
+
+/** Left, right, middle, repeated until both gutters are full; interleaved so the first
+ * MOBILE pieces (the only ones shown on phones) are balanced too. */
+function zones(): Zone[] {
+  const out: Zone[] = [];
+  for (let i = 0; i < PER_GUTTER; i++) out.push("left", "right", "middle");
+  while (out.length < DESKTOP) out.push("middle");
+  return out;
+}
+
 function makePieces(): Piece[] {
   const rnd = rng(11);
-  return Array.from({ length: DESKTOP }, () => {
+  const slot = { left: 0, right: 0, middle: 0 };
+  return zones().map((zone) => {
+    const k = slot[zone]++;
     const d = rnd();
     const tier = d > 0.86 ? "near" : d < 0.4 ? "far" : "mid";
     const scale = tier === "near" ? 1.35 : tier === "far" ? 0.7 : 1;
@@ -165,16 +182,21 @@ function makePieces(): Piece[] {
       ["0.3", "1"],
       ["0.7", "0.7"],
     ][Math.floor(rnd() * 3)];
+    // Gutter pieces are spread across their band, and their place in the fall is staggered
+    // by the golden ratio so one side never bunches up at the same height.
+    const across = zone === "middle" ? rnd() : (k + rnd()) / PER_GUTTER;
+    const left = zone === "left" ? 1 + across * 10 : zone === "right" ? 86 + across * 10 : 14 + across * 70;
+    const phase = zone === "middle" ? rnd() : (k * 0.618 + rnd() * 0.12) % 1;
     return {
       shape,
       angle: Math.floor(rnd() * 360),
       fall: {
-        left: `${(rnd() * 96 + 2).toFixed(2)}%`,
+        left: `${left.toFixed(2)}%`,
         width: `${w.toFixed(1)}px`,
         height: `${h.toFixed(1)}px`,
         opacity: tier === "near" ? 0.6 : tier === "far" ? 0.45 : 0.85,
         filter: tier === "near" ? "blur(1.2px)" : undefined,
-        animation: `part-fall ${dur.toFixed(1)}s linear -${(rnd() * dur).toFixed(1)}s infinite`,
+        animation: `part-fall ${dur.toFixed(1)}s linear -${(phase * dur).toFixed(1)}s infinite`,
         "--rest": `${(rnd() * 92 + 2).toFixed(1)}vh`,
       } as CSSProperties,
       sway: {

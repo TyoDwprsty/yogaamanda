@@ -24,12 +24,6 @@ export const defaultContent: SiteContent = {
       { platform: "instagram", username: "yogaamanda.a", mode: "auto", count: 525, show: true },
       { platform: "youtube", username: "yogaamanda.a", mode: "auto", count: 914, show: true },
     ],
-    eventsHeading: "Pernah jadi pembicara di",
-    events: [
-      { id: "event-1", year: "[Tahun]", name: "[Nama event]", detail: "[Penyelenggara · kota]", url: "" },
-      { id: "event-2", year: "[Tahun]", name: "[Nama event]", detail: "[Penyelenggara · kota]", url: "" },
-      { id: "event-3", year: "[Tahun]", name: "[Nama event]", detail: "[Penyelenggara · kota]", url: "" },
-    ],
   },
   video: {
     heading: "Video pilihan",

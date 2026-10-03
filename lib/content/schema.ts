@@ -156,18 +156,8 @@ export const followerAccountSchema = z.object({
   show: z.boolean(),
 });
 
-export const eventSchema = z.object({
-  id,
-  year: text(12),
-  name: text(140).min(1, "Nama event wajib diisi"),
-  detail: text(160),
-  url,
-});
-
 export const proofSchema = z.object({
   followers: z.array(followerAccountSchema).max(FOLLOWER_PLATFORMS.length),
-  eventsHeading: text(80),
-  events: z.array(eventSchema).max(30),
 });
 
 export const siteContentSchema = z.object({
@@ -200,7 +190,6 @@ export type ToolTab = z.infer<typeof toolTabSchema>;
 export type ToolRow = z.infer<typeof toolRowSchema>;
 export type FollowerPlatform = (typeof FOLLOWER_PLATFORMS)[number];
 export type FollowerAccount = z.infer<typeof followerAccountSchema>;
-export type SpeakingEvent = z.infer<typeof eventSchema>;
 
 export const messageInputSchema = z.object({
   name: text(80).min(1, "Nama wajib diisi"),

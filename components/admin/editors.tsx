@@ -337,7 +337,7 @@ export function ToolsEditor({ initial }: { initial: SiteContent["tools"] }) {
         </Card>
         <Card
           title="Tab"
-          description="Tombol di atas daftar (mis. Alat dan Studio). Tiap tab punya satu foto besar dan daftarnya sendiri. Baris daftar tidak bisa diklik, hanya menyala saat disorot."
+          description="Tombol di atas daftar (mis. Alat dan Studio). Tiap tab punya satu foto besar dan daftarnya sendiri. Baris daftar tidak bisa diklik, hanya menyala saat disorot. Tinggi bagian ini tetap: kalau barisnya banyak, daftarnya bisa di-scroll dan foto tidak ikut memanjang."
         >
           {ed.issue("tabs") && <p className="text-[12.5px] font-medium text-[#e5866b]">{ed.issue("tabs")}</p>}
           <ListEditor<ToolTab>

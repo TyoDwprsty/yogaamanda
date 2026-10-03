@@ -49,9 +49,10 @@ export function Tools({ tools }: { tools: SiteContent["tools"] }) {
 
       {sel && (
         // Mobile stacks tabs → photo → list; desktop puts tabs over the list and the photo beside both.
+        // The block has a fixed height so a long list scrolls instead of stretching the photo.
         <Reveal
           delay={0.1}
-          className={`${container} mt-8 grid grid-cols-1 gap-4 md:mt-10 md:grid-cols-[340px_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)] md:gap-x-8 md:gap-y-3`}
+          className={`${container} mt-8 grid grid-cols-1 gap-4 md:mt-10 md:h-[580px] md:grid-cols-[340px_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)] md:gap-x-8 md:gap-y-3`}
         >
           <div
             role="tablist"
@@ -87,7 +88,7 @@ export function Tools({ tools }: { tools: SiteContent["tools"] }) {
             })}
           </div>
 
-          <div className="relative h-[300px] overflow-hidden rounded-[22px] border border-line bg-surface md:col-start-2 md:row-span-2 md:row-start-1 md:h-auto md:min-h-[540px] md:rounded-[24px]">
+          <div className="relative h-[300px] overflow-hidden rounded-[22px] border border-line bg-surface md:col-start-2 md:row-span-2 md:row-start-1 md:h-auto md:rounded-[24px]">
             <Photo tab={sel} />
           </div>
 
@@ -95,34 +96,36 @@ export function Tools({ tools }: { tools: SiteContent["tools"] }) {
             id="tools-panel"
             role="tabpanel"
             aria-labelledby={`tools-tab-${sel.id}`}
-            className="rounded-3xl border border-line bg-surface p-2 md:col-start-1 md:row-start-2 md:p-2.5"
+            className="flex max-h-[380px] min-h-0 flex-col overflow-hidden rounded-3xl border border-line bg-surface md:col-start-1 md:row-start-2 md:max-h-none"
           >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.ol
-                key={sel.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.4, ease: EASE }}
-                className="flex flex-col gap-0.5"
-              >
-                {sel.items.map((row, i) => (
-                  <li
-                    key={row.id}
-                    className="group/row grid grid-cols-[28px_minmax(0,1fr)] items-baseline gap-3 rounded-2xl border border-transparent px-4 py-3.5 transition-[background-color,border-color,transform] duration-500 ease-[var(--ease-lux)] hover:translate-x-1 hover:border-line hover:bg-surface-2"
-                  >
-                    <span className="text-[13px] font-semibold text-muted tabular-nums transition-colors duration-500 group-hover/row:text-gold-text">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span className="flex flex-col gap-0.5">
-                      {row.label && <span className="text-[17px] font-bold text-ink">{row.label}</span>}
-                      {row.value && <span className="text-[13.5px] font-medium text-muted">{row.value}</span>}
-                    </span>
-                  </li>
-                ))}
-                {sel.items.length === 0 && <li className="px-4 py-6 text-center text-sm text-muted">Daftar masih kosong.</li>}
-              </motion.ol>
-            </AnimatePresence>
+            <div data-lenis-prevent className="scroll-thin min-h-0 flex-1 overflow-y-auto p-2 md:p-2.5">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.ol
+                  key={sel.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.4, ease: EASE }}
+                  className="flex flex-col gap-0.5"
+                >
+                  {sel.items.map((row, i) => (
+                    <li
+                      key={row.id}
+                      className="group/row grid grid-cols-[28px_minmax(0,1fr)] items-baseline gap-3 rounded-2xl border border-transparent px-4 py-3.5 transition-[background-color,border-color,transform] duration-500 ease-[var(--ease-lux)] hover:translate-x-1 hover:border-line hover:bg-surface-2"
+                    >
+                      <span className="text-[13px] font-semibold text-muted tabular-nums transition-colors duration-500 group-hover/row:text-gold-text">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span className="flex flex-col gap-0.5">
+                        {row.label && <span className="text-[17px] font-bold text-ink">{row.label}</span>}
+                        {row.value && <span className="text-[13.5px] font-medium text-muted">{row.value}</span>}
+                      </span>
+                    </li>
+                  ))}
+                  {sel.items.length === 0 && <li className="px-4 py-6 text-center text-sm text-muted">Daftar masih kosong.</li>}
+                </motion.ol>
+              </AnimatePresence>
+            </div>
           </div>
         </Reveal>
       )}

@@ -11,7 +11,7 @@ import { ArrowUpRightIcon } from "@/components/icons";
 const ITEMS = [
   { href: "/admin", label: "Ringkasan" },
   { href: "/admin/profil", label: "Profil" },
-  { href: "/admin/bukti", label: "Pengikut & pembicara" },
+  { href: "/admin/bukti", label: "Pengikut" },
   { href: "/admin/video", label: "Video" },
   { href: "/admin/konten", label: "Content Media" },
   { href: "/admin/tools", label: "Alat & studio" },
