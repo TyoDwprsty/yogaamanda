@@ -16,17 +16,32 @@ const TIMEOUT_MS = 9000;
 
 export class FetchCountError extends Error {}
 
+/** The low-level reason behind a failed fetch, e.g. "ECONNRESET" or "ENOTFOUND". */
+function networkCause(err: unknown) {
+  const cause = (err as { cause?: { code?: string; message?: string } })?.cause;
+  return cause?.code ?? cause?.message;
+}
+
 async function get(url: string, headers: Record<string, string> = {}) {
-  let res: Response;
-  try {
-    res = await fetch(url, {
+  const attempt = () =>
+    fetch(url, {
       headers: { "user-agent": UA, "accept-language": "en-US,en;q=0.9", ...headers },
       cache: "no-store",
       redirect: "follow",
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
+  let res: Response;
+  try {
+    // Platforms sometimes drop a server's connection outright; one quick retry rides out a blip.
+    res = await attempt().catch(async (err) => {
+      if ((err as Error).name === "TimeoutError") throw err;
+      await new Promise((r) => setTimeout(r, 1500));
+      return attempt();
+    });
   } catch (err) {
-    throw new FetchCountError((err as Error).name === "TimeoutError" ? "Waktu habis saat menghubungi server." : "Gagal terhubung.");
+    if ((err as Error).name === "TimeoutError") throw new FetchCountError("Waktu habis saat menghubungi server.");
+    const cause = networkCause(err);
+    throw new FetchCountError(`Gagal terhubung${cause ? ` (${cause})` : ""}. Biasanya platform menolak koneksi dari server.`);
   }
   if (res.status === 404) throw new FetchCountError("Akun tidak ditemukan (404). Cek username.");
   if (res.status === 429) throw new FetchCountError("Dibatasi oleh platform (429). Coba lagi nanti atau isi manual.");

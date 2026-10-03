@@ -123,8 +123,9 @@ export async function getFollowerStats(proof: SiteContent["proof"]): Promise<Fol
 
     const entry = snapshot[a.platform];
     let count = a.count;
-    if (a.mode === "auto") {
-      if (isStale(entry, username, now)) stale.push(a);
+    if (a.mode !== "manual") {
+      // "button" accounts use the stored reading too, but are never refreshed from here.
+      if (a.mode === "auto" && isStale(entry, username, now)) stale.push(a);
       if (entry?.username === username && entry.count != null && entry.fetchedAt) {
         count = entry.count;
         autoDates.push(entry.fetchedAt);

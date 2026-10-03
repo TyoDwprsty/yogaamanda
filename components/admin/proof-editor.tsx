@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { refreshFollowers } from "@/app/admin/actions";
 import { ArrowUpRightIcon, SOCIAL_ICONS } from "@/components/icons";
-import type { FollowerAccount, SiteContent } from "@/lib/content/schema";
+import type { FollowerAccount, FollowerPlatform, SiteContent } from "@/lib/content/schema";
 import { COUNT_NOUN, PLATFORM_NAME, formatDate, formatFull, normalizeHandle, profileUrl } from "@/lib/followers/shared";
 import type { FollowerSnapshot } from "@/lib/followers/store";
 import { Card, NumberField, Segmented, TextField, Toggle } from "./fields";
@@ -20,7 +20,7 @@ function Status({ account, snapshot }: { account: FollowerAccount; snapshot: Fol
   const entry = snapshot[account.platform];
   const current = entry && entry.username === handle ? entry : undefined;
   const autoCount = current?.count != null && current.fetchedAt ? current.count : null;
-  const shown = account.mode === "auto" && autoCount != null ? autoCount : account.count;
+  const shown = account.mode !== "manual" && autoCount != null ? autoCount : account.count;
 
   return (
     <div className="flex flex-col gap-1 rounded-2xl bg-bg/60 px-4 py-3 text-[13px] leading-relaxed">
@@ -30,7 +30,7 @@ function Status({ account, snapshot }: { account: FollowerAccount; snapshot: Fol
         <>
           {autoCount != null && current.fetchedAt && (
             <span className="text-ink">
-              Terbaca otomatis: <b className="tabular-nums">{formatFull(autoCount)}</b>{" "}
+              Terakhir terbaca: <b className="tabular-nums">{formatFull(autoCount)}</b>{" "}
               <span className="text-muted">· {formatDate(current.fetchedAt, true)}</span>
             </span>
           )}
@@ -58,7 +58,16 @@ function Status({ account, snapshot }: { account: FollowerAccount; snapshot: Fol
   );
 }
 
-export function ProofEditor({ initial, snapshot: initialSnapshot }: { initial: SiteContent["proof"]; snapshot: FollowerSnapshot }) {
+export function ProofEditor({
+  initial,
+  snapshot: initialSnapshot,
+  onVercel,
+}: {
+  initial: SiteContent["proof"];
+  snapshot: FollowerSnapshot;
+  /** True when this admin runs on Vercel, whose servers TikTok tends to refuse. */
+  onVercel: boolean;
+}) {
   const ed = useSectionEditor("proof", initial);
   const { draft: d, setDraft } = ed;
   const set = (patch: Partial<typeof d>) => setDraft({ ...d, ...patch });
@@ -68,11 +77,15 @@ export function ProofEditor({ initial, snapshot: initialSnapshot }: { initial: S
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [fetchMsg, setFetchMsg] = useState<string | null>(null);
   const [fetching, startFetch] = useTransition();
+  const [busy, setBusy] = useState<FollowerPlatform | "all" | null>(null);
 
-  const fetchNow = () =>
+  /** Reads the given accounts now, from the server this admin runs on. */
+  const fetchNow = (accounts: FollowerAccount[], key: FollowerPlatform | "all") =>
     startFetch(async () => {
+      setBusy(key);
       setFetchMsg(null);
-      const res = await refreshFollowers(d.followers);
+      const res = await refreshFollowers(accounts);
+      setBusy(null);
       if (!res.ok) return setFetchMsg(res.error);
       setSnapshot(res.snapshot);
       setFetchMsg(res.saved ? null : "Angka terbaca, tapi tidak tersimpan karena DATABASE_URL belum diisi.");
@@ -83,15 +96,15 @@ export function ProofEditor({ initial, snapshot: initialSnapshot }: { initial: S
       <div className="flex flex-col gap-6">
         <Card
           title="Jumlah pengikut"
-          description="Tampil tepat di bawah hero. Mode Otomatis membaca angka dari profil publik tiap ±6 jam; kalau gagal (Instagram dan TikTok kadang membatasi), angka manual yang dipakai."
+          description="Tampil tepat di bawah hero. Otomatis: website membaca angka dari profil publik tiap ±6 jam. Tombol saja: angka hanya diperbarui saat tombol ambil diklik (cocok untuk platform yang menolak server website). Manual: selalu angka yang kamu ketik. Kalau pembacaan gagal, angka terakhir yang berhasil (atau angka cadangan) tetap tampil."
           actions={
             <button
               type="button"
-              onClick={fetchNow}
+              onClick={() => fetchNow(d.followers, "all")}
               disabled={fetching}
               className="btn-ghost h-10 shrink-0 cursor-pointer rounded-full px-4 text-[13px] font-semibold text-ink disabled:cursor-wait disabled:opacity-60"
             >
-              {fetching ? "Mengambil…" : "Ambil angka sekarang"}
+              {busy === "all" ? "Mengambil…" : "Ambil semua sekarang"}
             </button>
           }
         >
@@ -105,16 +118,26 @@ export function ProofEditor({ initial, snapshot: initialSnapshot }: { initial: S
                   <span className="inline-flex items-center gap-2 text-sm font-bold text-ink">
                     <Icon size={16} /> {PLATFORM_NAME[a.platform]}
                   </span>
-                  {url && (
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[13px] font-semibold text-muted transition-colors hover:text-ink"
+                  <div className="flex flex-wrap items-center justify-end gap-3">
+                    {url && (
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[13px] font-semibold text-muted transition-colors hover:text-ink"
+                      >
+                        Buka profil <ArrowUpRightIcon size={13} />
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => fetchNow([a], a.platform)}
+                      disabled={fetching || !normalizeHandle(a.platform, a.username)}
+                      className="btn-ghost h-9 shrink-0 cursor-pointer rounded-full px-3.5 text-[12.5px] font-semibold text-ink disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Buka profil <ArrowUpRightIcon size={13} />
-                    </a>
-                  )}
+                      {busy === a.platform ? "Mengambil…" : `Ambil angka ${PLATFORM_NAME[a.platform]}`}
+                    </button>
+                  </div>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <TextField
@@ -129,7 +152,7 @@ export function ProofEditor({ initial, snapshot: initialSnapshot }: { initial: S
                     label={a.mode === "manual" ? "Jumlah (manual)" : "Angka cadangan (manual)"}
                     value={a.count}
                     onChange={(count) => setAccount(i, { count })}
-                    hint={a.mode === "manual" ? "Selalu angka ini yang tampil." : "Dipakai sampai pembacaan otomatis berhasil."}
+                    hint={a.mode === "manual" ? "Selalu angka ini yang tampil." : "Dipakai sampai pembacaan pertama berhasil."}
                     error={ed.issue(`followers.${i}.count`)}
                   />
                 </div>
@@ -140,11 +163,25 @@ export function ProofEditor({ initial, snapshot: initialSnapshot }: { initial: S
                     onChange={(mode) => setAccount(i, { mode })}
                     options={[
                       { value: "auto", label: "Otomatis" },
+                      { value: "button", label: "Tombol saja" },
                       { value: "manual", label: "Manual" },
                     ]}
                   />
                   <Toggle label="Tampilkan di website" checked={a.show} onChange={(show) => setAccount(i, { show })} />
                 </div>
+                {a.mode === "button" && (
+                  <p className="-mt-1 text-[12.5px] leading-relaxed text-muted">
+                    Website tidak membaca sendiri. Klik “Ambil angka {PLATFORM_NAME[a.platform]}” untuk memperbarui; angka baru tampil di
+                    website paling lambat 6 jam kemudian.
+                    {onVercel && (
+                      <span className="text-gold-text">
+                        {" "}
+                        Admin ini berjalan di Vercel, yang koneksinya sering ditolak {PLATFORM_NAME[a.platform]}. Klik dari admin di laptop
+                        (<code>npm run dev</code>, database yang sama) supaya terbaca dari IP rumahan.
+                      </span>
+                    )}
+                  </p>
+                )}
                 <Status account={a} snapshot={snapshot} />
               </div>
             );

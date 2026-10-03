@@ -149,9 +149,13 @@ export const followerAccountSchema = z.object({
   platform: z.enum(FOLLOWER_PLATFORMS),
   /** Handle without "@"; a pasted profile link is normalized when used. */
   username: text(200),
-  /** "auto" reads the count from the platform, "manual" always uses `count`. */
-  mode: z.enum(["auto", "manual"]),
-  /** Manual count. In auto mode it's the fallback until a fetch succeeds. */
+  /**
+   * "auto" reads the count from the platform in the background, "button" uses the last
+   * reading but only reads again when the fetch button in the admin is clicked (for
+   * platforms that refuse the host's servers), "manual" always uses `count`.
+   */
+  mode: z.enum(["auto", "button", "manual"]),
+  /** Manual count. In auto and button mode it's the fallback until a fetch succeeds. */
   count: z.number().int().min(0).max(10_000_000_000),
   show: z.boolean(),
 });

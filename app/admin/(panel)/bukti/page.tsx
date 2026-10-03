@@ -20,7 +20,7 @@ export default async function Page() {
         title="Pengikut"
         description="Angka pengikut tepat di bawah bagian paling atas website."
       />
-      <ProofEditor initial={proof} snapshot={snapshot} />
+      <ProofEditor initial={proof} snapshot={snapshot} onVercel={!!process.env.VERCEL} />
     </>
   );
 }
