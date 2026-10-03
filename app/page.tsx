@@ -17,7 +17,8 @@ export const revalidate = 21600;
 export default async function Home() {
   const content = await getContent();
   const followers = await getFollowerStats(content.proof);
-  const handle = content.profile.handleNote.split(" ")[0] || content.profile.name;
+  const username = content.proof.followers.find((f) => f.username)?.username;
+  const handle = username ? `@${username.replace(/^@/, "")}` : content.profile.name;
 
   return (
     <div className="relative isolate overflow-x-clip">
@@ -31,7 +32,7 @@ export default async function Home() {
         <ContentMedia content={content.contentMedia} />
         <TrackRecord proof={content.proof} />
         <Tools tools={content.tools} />
-        <Contact contact={content.contact} />
+        <Contact contact={content.contact} socials={content.profile.socials} />
       </main>
 
       <Footer content={content} />

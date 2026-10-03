@@ -4,6 +4,7 @@ import { CustomScrollbar } from "@/components/fx/custom-scrollbar";
 import { InlineScript } from "@/components/fx/inline-script";
 import { SmoothScroll } from "@/components/fx/smooth-scroll";
 import { THEME_STORAGE_KEY } from "@/components/fx/theme-key";
+import { getContent } from "@/lib/content/store";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -19,17 +20,18 @@ const newsreader = Newsreader({
   weight: ["400"],
 });
 
-export const metadata: Metadata = {
-  title: "Yoga Amanda — Cerita terbaik",
-  description:
-    "Content creator dan public speaker. Model kit, Gunpla, Blokees, dan cerita pop culture dari Yoga Amanda.",
-};
+// Title and description follow the Profil page in the admin.
+export async function generateMetadata(): Promise<Metadata> {
+  const { profile } = await getContent();
+  return {
+    title: profile.tagline ? `${profile.name} — ${profile.tagline}` : profile.name,
+    description: profile.metaDescription,
+  };
+}
 
+// The site opens in the light theme regardless of the system setting.
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#070605" },
-    { media: "(prefers-color-scheme: light)", color: "#fcfaf7" },
-  ],
+  themeColor: "#fcfaf7",
 };
 
 // Runs before first paint so the saved theme never flashes.
@@ -37,7 +39,7 @@ const themeScript = `(function(){try{var t=localStorage.getItem("${THEME_STORAGE
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="id" data-theme="dark" className={`${montserrat.variable} ${newsreader.variable}`} suppressHydrationWarning>
+    <html lang="id" data-theme="light" className={`${montserrat.variable} ${newsreader.variable}`} suppressHydrationWarning>
       <head>
         <InlineScript html={themeScript} />
       </head>

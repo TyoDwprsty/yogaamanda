@@ -4,31 +4,8 @@
 
 /* ───────────────────────── Amber Crown tokens ───────────────────────── */
 
+/* Light is the default, whatever the visitor's system theme is. */
 :root,
-[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #070605;
-  --bg2: #0e0b08;
-  --surface: #15110d;
-  --surface-2: #1c1711;
-  --nav-bg: rgba(21, 17, 13, 0.72);
-  --line: #2c241b;
-  --line-strong: #43372a;
-  --ink: #f4ecdf;
-  --muted: #ab9e8b;
-  --gold: #e3a04b;
-  --gold-text: #e3a04b;
-  --gold-hi: #f8d293;
-  --gold-lo: #a5601e;
-  --gold-pale: #fff4dc;
-  --on-gold: #1b1207;
-  --glow: rgba(227, 160, 75, 0.16);
-  --glow-strong: rgba(227, 160, 75, 0.45);
-  --tint: rgba(227, 160, 75, 0.1);
-  --shadow: rgba(0, 0, 0, 0.55);
-  --grain-opacity: 0.05;
-}
-
 [data-theme="light"] {
   color-scheme: light;
   --bg: #fcfaf7;
@@ -51,6 +28,30 @@
   --tint: rgba(216, 150, 63, 0.12);
   --shadow: rgba(80, 52, 18, 0.18);
   --grain-opacity: 0.035;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #070605;
+  --bg2: #0e0b08;
+  --surface: #15110d;
+  --surface-2: #1c1711;
+  --nav-bg: rgba(21, 17, 13, 0.72);
+  --line: #2c241b;
+  --line-strong: #43372a;
+  --ink: #f4ecdf;
+  --muted: #ab9e8b;
+  --gold: #e3a04b;
+  --gold-text: #e3a04b;
+  --gold-hi: #f8d293;
+  --gold-lo: #a5601e;
+  --gold-pale: #fff4dc;
+  --on-gold: #1b1207;
+  --glow: rgba(227, 160, 75, 0.16);
+  --glow-strong: rgba(227, 160, 75, 0.45);
+  --tint: rgba(227, 160, 75, 0.1);
+  --shadow: rgba(0, 0, 0, 0.55);
+  --grain-opacity: 0.05;
 }
 
 @theme inline {

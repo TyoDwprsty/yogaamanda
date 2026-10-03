@@ -26,11 +26,16 @@ export const socialSchema = z.object({
   url,
 });
 
+export const DEFAULT_META_DESCRIPTION =
+  "Content creator dan public speaker. Model kit, Gunpla, Blokees, dan cerita pop culture dari Yoga Amanda.";
+
 export const profileSchema = z.object({
   name: text(80).min(1, "Nama wajib diisi"),
   tagline: text(80),
   bio: text(600),
   handleNote: text(120),
+  /** Search-result and link-preview description; the bio is often too poetic for that. */
+  metaDescription: text(200).default(DEFAULT_META_DESCRIPTION),
   avatar: mediaPath,
   socials: z.array(socialSchema).max(12),
 });
@@ -55,7 +60,6 @@ export const videoSchema = z.object({
     poster: mediaPath,
     youtubeUrl: url,
   }),
-  shortsHeading: text(80).default("Short video"),
   shorts: z.array(shortSchema).max(9),
 });
 
@@ -75,25 +79,68 @@ export const contentMediaSchema = z.object({
   items: z.array(mediaItemSchema).max(12),
 });
 
-export const toolSchema = z.object({
+export const toolRowSchema = z.object({
   id,
-  name: text(60).min(1, "Nama alat wajib diisi"),
-  product: text(120),
-  description: text(240),
-  photo: mediaPath,
+  label: text(60),
+  value: text(160),
 });
 
-export const toolsSchema = z.object({
-  heading: text(80),
-  description: text(240),
-  items: z.array(toolSchema).max(20),
+export const toolTabSchema = z.object({
+  id,
+  label: text(40).min(1, "Nama tab wajib diisi"),
+  photo: mediaPath,
+  items: z.array(toolRowSchema).max(20),
 });
+
+/** Before the tabs, each tool was its own row with a photo. Folds that into one "Alat" tab. */
+function migrateTools(v: unknown) {
+  if (!v || typeof v !== "object" || "tabs" in v || !("items" in v) || !Array.isArray(v.items)) return v;
+  const old = v.items as { id?: string; name?: string; product?: string; photo?: string }[];
+  const rest: Record<string, unknown> = { ...v };
+  delete rest.items;
+  return {
+    ...rest,
+    // The client renamed this section together with the switch to tabs.
+    heading: rest.heading === "My daily driver" ? "Pewujud cerita" : rest.heading,
+    tabs: [
+      {
+        id: "alat",
+        label: "Alat",
+        photo: old.find((t) => t.photo)?.photo ?? "",
+        items: old.map((t, i) => ({ id: t.id || `alat-${i}`, label: t.name ?? "", value: t.product ?? "" })),
+      },
+      { id: "studio", label: "Studio", photo: "", items: [] },
+    ],
+  };
+}
+
+export const toolsSchema = z.preprocess(
+  migrateTools,
+  z.object({
+    heading: text(80),
+    description: text(240),
+    tabs: z.array(toolTabSchema).min(1, "Minimal satu tab").max(4),
+  }),
+);
 
 export const contactSchema = z.object({
   heading: text(80),
   text: text(400),
   email: z.union([z.literal(""), z.string().trim().email("Email tidak valid").max(160)]),
   phone: text(40),
+  showSocials: z.boolean().default(true),
+});
+
+export const footerSchema = z.object({
+  /** Empty = the name from Profil. */
+  title: text(80),
+  /** Empty = the tagline from Profil. */
+  tagline: text(80),
+  /** Shown after "© <year>". Empty = the name from Profil. */
+  copyright: text(120),
+  showSocials: z.boolean(),
+  showEmail: z.boolean(),
+  showPhone: z.boolean(),
 });
 
 export const FOLLOWER_PLATFORMS = ["tiktok", "instagram", "youtube"] as const;
@@ -109,13 +156,6 @@ export const followerAccountSchema = z.object({
   show: z.boolean(),
 });
 
-export const brandSchema = z.object({
-  id,
-  name: text(80).min(1, "Nama brand wajib diisi"),
-  logo: mediaPath,
-  url,
-});
-
 export const eventSchema = z.object({
   id,
   year: text(12),
@@ -126,8 +166,6 @@ export const eventSchema = z.object({
 
 export const proofSchema = z.object({
   followers: z.array(followerAccountSchema).max(FOLLOWER_PLATFORMS.length),
-  brandsHeading: text(80),
-  brands: z.array(brandSchema).max(30),
   eventsHeading: text(80),
   events: z.array(eventSchema).max(30),
 });
@@ -139,6 +177,7 @@ export const siteContentSchema = z.object({
   contentMedia: contentMediaSchema,
   tools: toolsSchema,
   contact: contactSchema,
+  footer: footerSchema,
 });
 
 export const sectionSchemas = {
@@ -148,6 +187,7 @@ export const sectionSchemas = {
   contentMedia: contentMediaSchema,
   tools: toolsSchema,
   contact: contactSchema,
+  footer: footerSchema,
 } as const;
 
 export type SiteContent = z.infer<typeof siteContentSchema>;
@@ -156,10 +196,10 @@ export type Social = z.infer<typeof socialSchema>;
 export type SocialPlatform = Social["platform"];
 export type Short = z.infer<typeof shortSchema>;
 export type MediaItem = z.infer<typeof mediaItemSchema>;
-export type Tool = z.infer<typeof toolSchema>;
+export type ToolTab = z.infer<typeof toolTabSchema>;
+export type ToolRow = z.infer<typeof toolRowSchema>;
 export type FollowerPlatform = (typeof FOLLOWER_PLATFORMS)[number];
 export type FollowerAccount = z.infer<typeof followerAccountSchema>;
-export type Brand = z.infer<typeof brandSchema>;
 export type SpeakingEvent = z.infer<typeof eventSchema>;
 
 export const messageInputSchema = z.object({

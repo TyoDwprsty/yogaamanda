@@ -11,18 +11,21 @@ export default async function AdminHome() {
   const stats = [
     { label: "Short video", value: content.video.shorts.length, href: "/admin/video" },
     { label: "Kanal konten", value: content.contentMedia.items.length, href: "/admin/konten" },
-    { label: "Alat", value: content.tools.items.length, href: "/admin/tools" },
+    { label: "Baris alat & studio", value: content.tools.tabs.reduce((n, t) => n + t.items.length, 0), href: "/admin/tools" },
     { label: "Pesan belum dibaca", value: unread, href: "/admin/pesan" },
   ];
 
+  // Listed in page order. The quoted text is what the section currently says on the site.
+  const { profile, proof, video, contentMedia, tools, contact } = content;
   const sections = [
-    { href: "/admin/profil", title: "Profil", text: "Foto, nama, tagline, bio, media sosial" },
-    { href: "/admin/bukti", title: "Bukti & pengikut", text: "Jumlah pengikut, brand kolaborasi, event pembicara" },
-    { href: "/admin/video", title: "Video", text: "Video utama dan short video 9:16" },
-    { href: "/admin/konten", title: "Content Media", text: "Kanal, foto/GIF/video, deskripsi" },
-    { href: "/admin/tools", title: "Tools", text: "My daily driver beserta fotonya" },
-    { href: "/admin/kontak", title: "Kontak", text: "Email, telepon, teks ajakan" },
-    { href: "/admin/pesan", title: "Pesan masuk", text: "Pesan dari form kontak website" },
+    { href: "/admin/profil", title: "Profil", text: `Paling atas: “${profile.tagline || profile.name}”, foto, media sosial` },
+    { href: "/admin/bukti", title: "Pengikut & pembicara", text: `Angka pengikut dan “${proof.eventsHeading}”` },
+    { href: "/admin/video", title: "Video", text: `“${video.main.title || video.heading}”, video utama dan short` },
+    { href: "/admin/konten", title: "Content Media", text: `“${contentMedia.heading}”: kanal, foto/GIF/video` },
+    { href: "/admin/tools", title: "Alat & studio", text: `“${tools.heading}”: ${tools.tabs.map((t) => t.label).join(", ")}` },
+    { href: "/admin/kontak", title: "Kontak", text: `“${contact.heading}”: email, telepon, teks` },
+    { href: "/admin/footer", title: "Footer", text: "Paling bawah: nama, ikon sosial, hak cipta" },
+    { href: "/admin/pesan", title: "Pesan masuk", text: `Pesan dari form “${contact.heading}”` },
   ];
 
   return (

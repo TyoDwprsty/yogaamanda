@@ -12,11 +12,11 @@ function subscribe(cb: () => void) {
 }
 
 function read(): Theme {
-  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
+  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
 }
 
 export function useTheme(): Theme {
-  return useSyncExternalStore(subscribe, read, () => "dark");
+  return useSyncExternalStore(subscribe, read, () => "light");
 }
 
 let switching = false;

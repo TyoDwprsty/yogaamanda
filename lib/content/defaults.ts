@@ -1,13 +1,14 @@
-import type { SiteContent } from "./schema";
+import { DEFAULT_META_DESCRIPTION, type SiteContent } from "./schema";
 
 // Initial content, taken from the design reference. The admin panel saves a copy of this
 // to storage/content.json the first time anything is edited.
 export const defaultContent: SiteContent = {
   profile: {
     name: "Yoga Amanda",
-    tagline: "Cerita terbaik",
-    bio: "Content creator dan public speaker. Belakangan juga sibuk merakit model kit, dari Gunpla sampai Blokees, dan membawa cerita pop culture ke layar kamu.",
-    handleNote: "@yogaamanda.a di semua platform",
+    tagline: "Carpe diem",
+    bio: "Akan kuukur tingginya langit dari bagaimana aku jatuh ke bumi dan kuukur cepatnya dari angin yang melintasi telinga",
+    handleNote: "",
+    metaDescription: DEFAULT_META_DESCRIPTION,
     avatar: "/media/profile.webp",
     socials: [
       { id: "tiktok", platform: "tiktok", label: "TikTok @yogaamanda.a", url: "https://www.tiktok.com/@yogaamanda.a" },
@@ -22,13 +23,6 @@ export const defaultContent: SiteContent = {
       { platform: "tiktok", username: "yogaamanda.a", mode: "auto", count: 9091, show: true },
       { platform: "instagram", username: "yogaamanda.a", mode: "auto", count: 525, show: true },
       { platform: "youtube", username: "yogaamanda.a", mode: "auto", count: 914, show: true },
-    ],
-    brandsHeading: "Pernah kolaborasi dengan",
-    brands: [
-      { id: "brand-1", name: "[Nama brand 1]", logo: "", url: "" },
-      { id: "brand-2", name: "[Nama brand 2]", logo: "", url: "" },
-      { id: "brand-3", name: "[Nama brand 3]", logo: "", url: "" },
-      { id: "brand-4", name: "[Nama brand 4]", logo: "", url: "" },
     ],
     eventsHeading: "Pernah jadi pembicara di",
     events: [
@@ -50,7 +44,6 @@ export const defaultContent: SiteContent = {
       poster: "/media/hero-21x9-poster.webp",
       youtubeUrl: "",
     },
-    shortsHeading: "Short video",
     shorts: [
       { id: "short-1", title: "Aku skeptis", src: "/media/short-1.mp4", poster: "/media/short-1-poster.webp" },
       { id: "short-2", title: "Galaxy version", src: "/media/short-2.mp4", poster: "/media/short-2-poster.webp" },
@@ -100,15 +93,32 @@ export const defaultContent: SiteContent = {
     ],
   },
   tools: {
-    heading: "My daily driver",
+    heading: "Pewujud cerita",
     description: "Alat yang dipakai hampir setiap hari untuk merekam, bicara, dan merakit.",
-    items: [
-      { id: "camera", name: "Camera", product: "[Merek & tipe kamera]", description: "[Satu kalimat kenapa alat ini dipakai]", photo: "" },
-      { id: "lighting", name: "Lighting", product: "[Lampu utama & fill light]", description: "[Satu kalimat kenapa alat ini dipakai]", photo: "" },
-      { id: "microphone", name: "Microphone", product: "[Merek & tipe mic]", description: "[Satu kalimat kenapa alat ini dipakai]", photo: "" },
-      { id: "smartphone", name: "Smartphone", product: "[Tipe HP]", description: "[Satu kalimat kenapa alat ini dipakai]", photo: "" },
-      { id: "tripod", name: "Tripod & gimbal", product: "[Merek & tipe]", description: "[Satu kalimat kenapa alat ini dipakai]", photo: "" },
-      { id: "hobby", name: "Hobby tools", product: "[Nipper, panel liner, dll.]", description: "[Satu kalimat kenapa alat ini dipakai]", photo: "" },
+    tabs: [
+      {
+        id: "alat",
+        label: "Alat",
+        photo: "",
+        items: [
+          { id: "camera", label: "Camera", value: "[Merek & tipe kamera]" },
+          { id: "lighting", label: "Lighting", value: "[Lampu utama & fill light]" },
+          { id: "microphone", label: "Microphone", value: "[Merek & tipe mic]" },
+          { id: "smartphone", label: "Smartphone", value: "[Tipe HP]" },
+          { id: "tripod", label: "Tripod & gimbal", value: "[Merek & tipe]" },
+          { id: "hobby", label: "Hobby tools", value: "[Nipper, panel liner, dll.]" },
+        ],
+      },
+      {
+        id: "studio",
+        label: "Studio",
+        photo: "",
+        items: [
+          { id: "room", label: "Ruangan", value: "[Ukuran & lokasi]" },
+          { id: "backdrop", label: "Backdrop", value: "[Rak koleksi, dinding, dll.]" },
+          { id: "desk", label: "Meja kerja", value: "[Meja rakit & penyimpanan]" },
+        ],
+      },
     ],
   },
   contact: {
@@ -116,5 +126,14 @@ export const defaultContent: SiteContent = {
     text: "Undangan bicara, kolaborasi konten, atau sekadar menyapa. Semua pesan dibaca sendiri.",
     email: "yogaamandaline@gmail.com",
     phone: "0851 8681 5801",
+    showSocials: true,
+  },
+  footer: {
+    title: "",
+    tagline: "",
+    copyright: "",
+    showSocials: true,
+    showEmail: true,
+    showPhone: true,
   },
 };

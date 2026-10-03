@@ -6,7 +6,10 @@ export default async function Page() {
   const content = await getContent();
   return (
     <>
-      <PageHeader title="Content Media" description="Kanal-kanal konten beserta foto, GIF, atau videonya." />
+      <PageHeader
+        title="Content Media"
+        description={`Bagian “${content.contentMedia.heading}” (menu “Content” di website), setelah video: kanal-kanal konten beserta foto, GIF, atau videonya.`}
+      />
       <ContentMediaEditor initial={content.contentMedia} />
     </>
   );

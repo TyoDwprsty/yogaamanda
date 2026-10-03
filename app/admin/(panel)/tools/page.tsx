@@ -6,7 +6,10 @@ export default async function Page() {
   const content = await getContent();
   return (
     <>
-      <PageHeader title="Tools" description="Daftar alat “My daily driver” beserta fotonya." />
+      <PageHeader
+        title="Alat & studio"
+        description={`Bagian “${content.tools.heading}” (menu “Tools” di website), sebelum bagian kontak: tab, daftar per tab, dan satu foto per tab.`}
+      />
       <ToolsEditor initial={content.tools} />
     </>
   );

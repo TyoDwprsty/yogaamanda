@@ -6,7 +6,10 @@ export default async function Page() {
   const content = await getContent();
   return (
     <>
-      <PageHeader title="Video" description="Video utama dan short video. File yang di-upload dioptimalkan otomatis." />
+      <PageHeader
+        title="Video"
+        description={`Bagian “${content.video.heading}” (menu “Video” di website), tepat di bawah angka pengikut. File yang di-upload dioptimalkan otomatis.`}
+      />
       <VideoEditor initial={content.video} />
     </>
   );

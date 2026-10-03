@@ -11,11 +11,12 @@ import { ArrowUpRightIcon } from "@/components/icons";
 const ITEMS = [
   { href: "/admin", label: "Ringkasan" },
   { href: "/admin/profil", label: "Profil" },
-  { href: "/admin/bukti", label: "Bukti & pengikut" },
+  { href: "/admin/bukti", label: "Pengikut & pembicara" },
   { href: "/admin/video", label: "Video" },
   { href: "/admin/konten", label: "Content Media" },
-  { href: "/admin/tools", label: "Tools" },
+  { href: "/admin/tools", label: "Alat & studio" },
   { href: "/admin/kontak", label: "Kontak" },
+  { href: "/admin/footer", label: "Footer" },
   { href: "/admin/pesan", label: "Pesan masuk" },
 ] as const;
 

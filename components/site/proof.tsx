@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Reveal } from "@/components/fx/reveal";
 import { ArrowUpRightIcon, SOCIAL_ICONS } from "@/components/icons";
 import type { SiteContent } from "@/lib/content/schema";
@@ -63,79 +62,46 @@ export function FollowerBand({ stats }: { stats: FollowerStats }) {
   );
 }
 
-/** Brands worked with and stages spoken on: names, years and places. */
+/** Stages spoken on: years, names and places. */
 export function TrackRecord({ proof }: { proof: SiteContent["proof"] }) {
-  const { brands, events } = proof;
-  if (!brands.length && !events.length) return null;
+  const { events } = proof;
+  if (!events.length) return null;
 
   return (
     <section
       id="jejak"
-      aria-label="Rekam jejak"
-      className={`${container} grid grid-cols-1 gap-16 py-24 md:grid-cols-12 md:gap-12 md:py-36`}
+      aria-labelledby="jejak-title"
+      className={`${container} grid grid-cols-1 gap-8 py-24 md:grid-cols-12 md:gap-12 md:py-36`}
     >
-      {brands.length > 0 && (
-        <Reveal className={events.length ? "md:col-span-5" : "md:col-span-12"}>
-          <h2 className="text-[26px] leading-tight font-bold tracking-[-0.025em] text-ink md:text-[30px]">{proof.brandsHeading}</h2>
-          <ul className="mt-8 flex flex-wrap items-center gap-x-9 gap-y-6">
-            {brands.map((b) => {
-              const mark = b.logo ? (
-                <span className="relative block h-9 w-[120px]">
-                  <Image
-                    src={b.logo}
-                    alt={b.name}
-                    fill
-                    sizes="120px"
-                    className="object-contain object-left opacity-75 grayscale transition-[filter,opacity] duration-500 group-hover/brand:opacity-100 group-hover/brand:grayscale-0"
-                  />
-                </span>
-              ) : (
-                <span className="text-xl font-bold tracking-[-0.02em] text-muted transition-colors duration-500 group-hover/brand:text-ink md:text-[22px]">
-                  {b.name}
-                </span>
-              );
-              return (
-                <li key={b.id} className="group/brand">
-                  {b.url ? (
-                    <a href={b.url} target="_blank" rel="noopener noreferrer" aria-label={b.logo ? b.name : undefined}>
-                      {mark}
+      <Reveal className="md:col-span-4">
+        <h2 id="jejak-title" className="text-[26px] leading-tight font-bold tracking-[-0.025em] text-ink md:text-[30px]">
+          {proof.eventsHeading}
+        </h2>
+      </Reveal>
+
+      <Reveal delay={0.08} className="md:col-span-8">
+        <ol className="flex flex-col gap-7">
+          {events.map((e) => {
+            const name = <span className="text-lg leading-snug font-semibold text-ink md:text-[19px]">{e.name}</span>;
+            return (
+              <li key={e.id} className="grid grid-cols-[64px_minmax(0,1fr)] gap-4 md:grid-cols-[80px_minmax(0,1fr)]">
+                <span className="pt-0.5 text-[15px] font-medium text-muted tabular-nums">{e.year}</span>
+                <div className="flex flex-col gap-1">
+                  {e.url ? (
+                    <a href={e.url} target="_blank" rel="noopener noreferrer" className="group/ev inline-flex items-start gap-1.5">
+                      {name}
+                      <ArrowUpRightIcon size={14} className="mt-1.5 shrink-0 text-muted transition-colors group-hover/ev:text-ink" />
                     </a>
                   ) : (
-                    mark
+                    name
                   )}
-                </li>
-              );
-            })}
-          </ul>
-        </Reveal>
-      )}
-
-      {events.length > 0 && (
-        <Reveal delay={0.08} className={brands.length ? "md:col-span-6 md:col-start-7" : "md:col-span-12"}>
-          <h2 className="text-[26px] leading-tight font-bold tracking-[-0.025em] text-ink md:text-[30px]">{proof.eventsHeading}</h2>
-          <ol className="mt-8 flex flex-col gap-7">
-            {events.map((e) => {
-              const name = <span className="text-lg leading-snug font-semibold text-ink md:text-[19px]">{e.name}</span>;
-              return (
-                <li key={e.id} className="grid grid-cols-[64px_minmax(0,1fr)] gap-4 md:grid-cols-[80px_minmax(0,1fr)]">
-                  <span className="pt-0.5 text-[15px] font-medium text-muted tabular-nums">{e.year}</span>
-                  <div className="flex flex-col gap-1">
-                    {e.url ? (
-                      <a href={e.url} target="_blank" rel="noopener noreferrer" className="group/ev inline-flex items-start gap-1.5">
-                        {name}
-                        <ArrowUpRightIcon size={14} className="mt-1.5 shrink-0 text-muted transition-colors group-hover/ev:text-ink" />
-                      </a>
-                    ) : (
-                      name
-                    )}
-                    {e.detail && <span className="text-[15px] text-muted">{e.detail}</span>}
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
-        </Reveal>
-      )}
+                  {e.detail && <span className="text-[15px] text-muted">{e.detail}</span>}
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      </Reveal>
     </section>
   );
 }

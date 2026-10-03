@@ -3,12 +3,11 @@
 import { useState, useTransition } from "react";
 import { refreshFollowers } from "@/app/admin/actions";
 import { ArrowUpRightIcon, SOCIAL_ICONS } from "@/components/icons";
-import type { Brand, FollowerAccount, SiteContent, SpeakingEvent } from "@/lib/content/schema";
+import type { FollowerAccount, SiteContent, SpeakingEvent } from "@/lib/content/schema";
 import { COUNT_NOUN, PLATFORM_NAME, formatDate, formatFull, normalizeHandle, profileUrl } from "@/lib/followers/shared";
 import type { FollowerSnapshot } from "@/lib/followers/store";
 import { Card, NumberField, Segmented, TextField, Toggle } from "./fields";
 import { ListEditor, newId } from "./list-editor";
-import { MediaField } from "./media-field";
 import { SaveBar, useSectionEditor } from "./use-section-editor";
 
 const HANDLE_HINT: Record<FollowerAccount["platform"], string> = {
@@ -157,42 +156,11 @@ export function ProofEditor({ initial, snapshot: initialSnapshot }: { initial: S
           </p>
         </Card>
 
-        <Card title="Brand kolaborasi" description="Ditulis sebagai nama, atau logo kalau di-upload (tampil abu-abu, berwarna saat disorot).">
-          <TextField label="Judul" value={d.brandsHeading} onChange={(brandsHeading) => set({ brandsHeading })} />
-          <ListEditor<Brand>
-            items={d.brands}
-            onChange={(brands) => set({ brands })}
-            max={30}
-            addLabel="Tambah brand"
-            create={() => ({ id: newId(), name: "", logo: "", url: "" })}
-            itemLabel={(b, i) => b.name || `Brand ${i + 1}`}
-            renderItem={(b, update, i) => (
-              <>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <TextField label="Nama brand" value={b.name} onChange={(name) => update({ name })} error={ed.issue(`brands.${i}.name`)} />
-                  <TextField
-                    label="Link (opsional)"
-                    value={b.url}
-                    onChange={(url) => update({ url })}
-                    placeholder="https://"
-                    error={ed.issue(`brands.${i}.url`)}
-                  />
-                </div>
-                <MediaField
-                  label="Logo (opsional)"
-                  kind="image"
-                  aspect="3/1"
-                  value={b.logo}
-                  onChange={(logo) => update({ logo })}
-                  hint="PNG/SVG transparan paling bagus. Kosongkan untuk menampilkan nama saja."
-                />
-              </>
-            )}
-          />
-        </Card>
-
-        <Card title="Pernah jadi pembicara" description="Urutan di sini = urutan di website. Taruh yang terbaru di atas.">
-          <TextField label="Judul" value={d.eventsHeading} onChange={(eventsHeading) => set({ eventsHeading })} />
+        <Card
+          title="Daftar event pembicara"
+          description="Daftar tahun + nama event di antara Content Media dan bagian alat. Urutan di sini = urutan di website; taruh yang terbaru di atas. Kosongkan daftar untuk menyembunyikan bagian ini."
+        >
+          <TextField label="Judul bagian" value={d.eventsHeading} onChange={(eventsHeading) => set({ eventsHeading })} />
           <ListEditor<SpeakingEvent>
             items={d.events}
             onChange={(events) => set({ events })}

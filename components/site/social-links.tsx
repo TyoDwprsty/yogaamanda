@@ -2,11 +2,19 @@ import { Magnetic } from "@/components/fx/magnetic";
 import { SOCIAL_ICONS } from "@/components/icons";
 import type { Social } from "@/lib/content/schema";
 
-export function SocialLinks({ socials, size = "lg" }: { socials: Social[]; size?: "lg" | "md" }) {
+export function SocialLinks({
+  socials,
+  size = "lg",
+  align = "center",
+}: {
+  socials: Social[];
+  size?: "lg" | "md";
+  align?: "center" | "start";
+}) {
   const box = size === "lg" ? "size-[52px] md:size-14" : "size-12";
   const icon = size === "lg" ? 22 : 20;
   return (
-    <div className="flex flex-wrap justify-center gap-3.5 md:gap-4">
+    <div className={`flex flex-wrap gap-3.5 md:gap-4 ${align === "center" ? "justify-center" : "justify-start"}`}>
       {socials
         .filter((s) => s.url)
         .map((s) => {

@@ -6,8 +6,9 @@ import { sendMessage, type ContactState } from "@/app/actions";
 import { Magnetic } from "@/components/fx/magnetic";
 import { Reveal } from "@/components/fx/reveal";
 import { CheckIcon, MailIcon, PhoneIcon } from "@/components/icons";
-import type { SiteContent } from "@/lib/content/schema";
+import type { SiteContent, Social } from "@/lib/content/schema";
 import { container } from "./section";
+import { SocialLinks } from "./social-links";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -63,7 +64,7 @@ function Burst() {
   );
 }
 
-export function Contact({ contact }: { contact: SiteContent["contact"] }) {
+export function Contact({ contact, socials }: { contact: SiteContent["contact"]; socials: Social[] }) {
   const [state, action, pending] = useActionState<ContactState, FormData>(sendMessage, { status: "idle" });
   const tel = contact.phone.replace(/[^\d+]/g, "").replace(/^0/, "+62");
 
@@ -99,6 +100,11 @@ export function Contact({ contact }: { contact: SiteContent["contact"] }) {
             </a>
           )}
         </div>
+        {contact.showSocials && socials.some((s) => s.url) && (
+          <div className="mt-2 border-t border-line pt-6 md:mt-4 md:pt-7">
+            <SocialLinks socials={socials} size="md" align="start" />
+          </div>
+        )}
       </Reveal>
 
       <Reveal delay={0.1}>
