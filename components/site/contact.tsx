@@ -143,27 +143,29 @@ export function Contact({ contact, socials }: { contact: SiteContent["contact"];
     </div>
   );
 
-  // Without the form, the contact details take the form's place: a card on the right with
-  // email & phone and the social accounts as two labelled groups.
+  // Without the form, the heading stacks over a full-width card: email & phone and the
+  // social accounts as two labelled columns (stacked below lg, where the email would wrap).
   if (!contact.showForm) {
     const groups = [
       direct && { title: "Email & telepon", body: direct },
       social && { title: "Media sosial", body: social },
     ].filter((g) => !!g);
     return (
-      <section
-        id="contact"
-        aria-labelledby="contact-title"
-        className={`${container} grid grid-cols-1 items-start gap-10 py-20 md:grid-cols-[400px_minmax(0,1fr)] md:gap-20 md:pt-32 md:pb-36`}
-      >
-        <Reveal className="flex flex-col gap-5 md:gap-6">{intro}</Reveal>
+      <section id="contact" aria-labelledby="contact-title" className={`${container} flex flex-col gap-8 py-20 md:gap-12 md:pt-32 md:pb-36`}>
+        <Reveal className="flex max-w-[640px] flex-col gap-5 md:gap-6">{intro}</Reveal>
         {groups.length > 0 && (
           <Reveal delay={0.1}>
-            <div className="flex flex-col rounded-[22px] border border-line bg-surface p-5 md:rounded-[28px] md:p-10">
+            <div
+              className={`grid grid-cols-1 rounded-[22px] border border-line bg-surface p-5 md:rounded-[28px] md:p-10 ${
+                groups.length > 1 ? "lg:grid-cols-2" : ""
+              }`}
+            >
               {groups.map((g, i) => (
                 <div
                   key={g.title}
-                  className={`flex min-w-0 flex-col gap-4 md:gap-5 ${i > 0 ? "mt-7 border-t border-line pt-7 md:mt-8 md:pt-8" : ""}`}
+                  className={`flex min-w-0 flex-col gap-4 md:gap-5 ${
+                    i > 0 ? "mt-7 border-t border-line pt-7 md:mt-8 md:pt-8 lg:mt-0 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-10" : "lg:pr-10"
+                  }`}
                 >
                   <h3 className="text-[13px] font-semibold tracking-[0.14em] text-muted uppercase">{g.title}</h3>
                   {g.body}
