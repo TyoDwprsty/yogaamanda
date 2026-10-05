@@ -5,10 +5,10 @@ import { useActionState } from "react";
 import { sendMessage, type ContactState } from "@/app/actions";
 import { Magnetic } from "@/components/fx/magnetic";
 import { Reveal } from "@/components/fx/reveal";
-import { CheckIcon, MailIcon, PhoneIcon } from "@/components/icons";
+import { CheckIcon, MailIcon, PhoneIcon, SOCIAL_ICONS } from "@/components/icons";
 import type { SiteContent, Social } from "@/lib/content/schema";
 import { container } from "./section";
-import { SocialLinks } from "./social-links";
+import { socialHandle } from "./social-links";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -38,6 +38,37 @@ function Field({
         </span>
       )}
     </div>
+  );
+}
+
+/** One line of the contact list: round icon on the left, the address or username on the right. */
+function ContactRow({
+  href,
+  icon,
+  label,
+  external,
+  children,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label?: string;
+  external?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      aria-label={label}
+      {...(external && { target: "_blank", rel: "noopener noreferrer" })}
+      className="group/c flex min-h-11 items-center gap-3.5 text-base font-medium text-ink"
+    >
+      <span className="btn-ghost grid size-11 shrink-0 place-items-center rounded-full text-ink group-hover/c:border-line-strong group-hover/c:bg-surface-2">
+        {icon}
+      </span>
+      <span className="min-w-0 break-all underline decoration-transparent underline-offset-4 transition-[text-decoration-color] duration-500 group-hover/c:decoration-current">
+        {children}
+      </span>
+    </a>
   );
 }
 
@@ -71,6 +102,60 @@ export function Contact({ contact, socials }: { contact: SiteContent["contact"];
   const err = state.fieldErrors ?? {};
   const v = state.values ?? {};
 
+  const links = socials.filter((s) => s.url);
+  const showSocials = contact.showSocials && links.length > 0;
+  const hasList = contact.email || contact.phone || showSocials;
+
+  const intro = (
+    <>
+      <h2 id="contact-title" className="text-[38px] leading-none font-extrabold tracking-[-0.035em] text-ink md:text-[56px]">
+        {contact.heading}
+      </h2>
+      {contact.text && <p className="text-[15px] leading-[1.65] text-muted md:text-[17px]">{contact.text}</p>}
+    </>
+  );
+
+  const list = hasList && (
+    <div className="flex flex-col gap-3.5">
+      {contact.email && (
+        <ContactRow href={`mailto:${contact.email}`} icon={<MailIcon size={18} />}>
+          {contact.email}
+        </ContactRow>
+      )}
+      {contact.phone && (
+        <ContactRow href={`tel:${tel}`} icon={<PhoneIcon size={18} />}>
+          {contact.phone}
+        </ContactRow>
+      )}
+      {showSocials && (
+        <div className={`flex flex-col gap-3.5 ${contact.email || contact.phone ? "mt-2 border-t border-line pt-6 md:mt-3 md:pt-7" : ""}`}>
+          {links.map((s) => {
+            const Icon = SOCIAL_ICONS[s.platform];
+            return (
+              <ContactRow key={s.id} href={s.url} icon={<Icon size={18} />} label={s.label || undefined} external>
+                {socialHandle(s)}
+              </ContactRow>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+
+  // Without the form, the intro and the contact list sit side by side on desktop.
+  if (!contact.showForm) {
+    return (
+      <section
+        id="contact"
+        aria-labelledby="contact-title"
+        className={`${container} grid grid-cols-1 items-end gap-10 py-20 md:grid-cols-[minmax(0,1fr)_minmax(0,420px)] md:gap-20 md:pt-32 md:pb-36`}
+      >
+        <Reveal className="flex max-w-[560px] flex-col gap-5 md:gap-6">{intro}</Reveal>
+        {list && <Reveal delay={0.1}>{list}</Reveal>}
+      </section>
+    );
+  }
+
   return (
     <section
       id="contact"
@@ -78,33 +163,8 @@ export function Contact({ contact, socials }: { contact: SiteContent["contact"];
       className={`${container} grid grid-cols-1 items-start gap-10 py-20 md:grid-cols-[400px_minmax(0,1fr)] md:gap-20 md:pt-32 md:pb-36`}
     >
       <Reveal className="flex flex-col gap-5 md:gap-6">
-        <h2 id="contact-title" className="text-[38px] leading-none font-extrabold tracking-[-0.035em] text-ink md:text-[56px]">
-          {contact.heading}
-        </h2>
-        {contact.text && <p className="text-[15px] leading-[1.65] text-muted md:text-[17px]">{contact.text}</p>}
-        <div className="mt-2 flex flex-col gap-3.5 md:mt-4">
-          {contact.email && (
-            <a href={`mailto:${contact.email}`} className="group/c flex min-h-11 items-center gap-3.5 text-base font-medium text-ink">
-              <span className="btn-ghost grid size-11 place-items-center rounded-full text-ink group-hover/c:border-line-strong group-hover/c:bg-surface-2">
-                <MailIcon size={18} />
-              </span>
-              <span className="break-all underline decoration-transparent underline-offset-4 transition-[text-decoration-color] duration-500 group-hover/c:decoration-current">{contact.email}</span>
-            </a>
-          )}
-          {contact.phone && (
-            <a href={`tel:${tel}`} className="group/c flex min-h-11 items-center gap-3.5 text-base font-medium text-ink">
-              <span className="btn-ghost grid size-11 place-items-center rounded-full text-ink group-hover/c:border-line-strong group-hover/c:bg-surface-2">
-                <PhoneIcon size={18} />
-              </span>
-              <span className="underline decoration-transparent underline-offset-4 transition-[text-decoration-color] duration-500 group-hover/c:decoration-current">{contact.phone}</span>
-            </a>
-          )}
-        </div>
-        {contact.showSocials && socials.some((s) => s.url) && (
-          <div className="mt-2 border-t border-line pt-6 md:mt-4 md:pt-7">
-            <SocialLinks socials={socials} size="md" align="start" />
-          </div>
-        )}
+        {intro}
+        {list && <div className="mt-2 md:mt-4">{list}</div>}
       </Reveal>
 
       <Reveal delay={0.1}>

@@ -58,7 +58,7 @@ export function VideoSection({ video }: { video: SiteContent["video"] }) {
 
       {/* Shorts: three vertical clips under the feature */}
       {shorts.length > 0 && (
-        <ul className="scroll-none -mx-5 mt-5 flex snap-x snap-mandatory scroll-px-5 gap-3.5 overflow-x-auto px-5 pb-1 md:mx-0 md:mt-6 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0">
+        <ul className="scroll-none -mx-5 mt-5 flex snap-x snap-mandatory scroll-px-5 gap-3.5 overflow-x-auto overflow-y-hidden overscroll-x-contain px-5 pb-1 md:mx-0 md:mt-6 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0">
           {shorts.map((s, i) => (
             <Reveal as="li" key={s.id} delay={0.06 + i * 0.06} className="w-[196px] shrink-0 snap-start md:w-auto">
               <div className="relative aspect-[9/16] w-full overflow-hidden rounded-[18px] border border-line bg-surface md:rounded-[24px]">

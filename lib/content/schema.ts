@@ -119,6 +119,9 @@ export const toolsSchema = z.preprocess(
   z.object({
     heading: text(80),
     description: text(240),
+    /** "tab" shows each tab's own photo; "shared" shows `photo` for every tab. */
+    photoMode: z.enum(["tab", "shared"]).default("tab"),
+    photo: mediaPath.default(""),
     tabs: z.array(toolTabSchema).min(1, "Minimal satu tab").max(4),
   }),
 );
@@ -129,6 +132,7 @@ export const contactSchema = z.object({
   email: z.union([z.literal(""), z.string().trim().email("Email tidak valid").max(160)]),
   phone: text(40),
   showSocials: z.boolean().default(true),
+  showForm: z.boolean().default(true),
 });
 
 export const footerSchema = z.object({

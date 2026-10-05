@@ -335,9 +335,32 @@ export function ToolsEditor({ initial }: { initial: SiteContent["tools"] }) {
           <TextField label="Judul besar" value={d.heading} onChange={(heading) => set({ heading })} />
           <TextArea label="Kalimat di bawah judul" value={d.description} onChange={(description) => set({ description })} rows={2} />
         </Card>
+        <Card title="Foto" description="Foto besar di kanan daftar (desktop) dan di atas daftar (HP).">
+          <Segmented
+            label="Pakai foto"
+            value={d.photoMode}
+            onChange={(photoMode) => set({ photoMode })}
+            options={[
+              { value: "tab", label: "Per tab" },
+              { value: "shared", label: "Satu untuk semua tab" },
+            ]}
+          />
+          {d.photoMode === "shared" ? (
+            <MediaField
+              label="Foto untuk semua tab"
+              kind="image"
+              aspect="4/5"
+              value={d.photo}
+              onChange={(photo) => set({ photo })}
+              hint="Tetap di tempat saat tab diganti, hanya daftarnya yang berubah. Di-crop di tengah, portrait 4:5 paling aman."
+            />
+          ) : (
+            <p className="text-[12.5px] text-muted">Foto diatur di masing-masing tab di bawah. Saat tab diganti, fotonya ikut berganti.</p>
+          )}
+        </Card>
         <Card
           title="Tab"
-          description="Tombol di atas daftar (mis. Alat dan Studio). Tiap tab punya satu foto besar dan daftarnya sendiri. Baris daftar tidak bisa diklik, hanya menyala saat disorot. Tinggi bagian ini tetap: kalau barisnya banyak, daftarnya bisa di-scroll dan foto tidak ikut memanjang."
+          description="Tombol di atas daftar (mis. Alat dan Studio). Tiap tab punya daftarnya sendiri. Baris daftar tidak bisa diklik, hanya menyala saat disorot. Tinggi bagian ini tetap: kalau barisnya banyak, daftarnya bisa di-scroll dan foto tidak ikut memanjang."
         >
           {ed.issue("tabs") && <p className="text-[12.5px] font-medium text-[#e5866b]">{ed.issue("tabs")}</p>}
           <ListEditor<ToolTab>
@@ -355,14 +378,16 @@ export function ToolsEditor({ initial }: { initial: SiteContent["tools"] }) {
                   onChange={(label) => update({ label })}
                   error={ed.issue(`tabs.${i}.label`)}
                 />
-                <MediaField
-                  label="Foto tab ini"
-                  kind="image"
-                  aspect="4/5"
-                  value={t.photo}
-                  onChange={(photo) => update({ photo })}
-                  hint="Tampil tinggi di kanan daftar (desktop) dan melebar di atas daftar (HP), di-crop di tengah. Portrait 4:5 paling aman."
-                />
+                {d.photoMode === "tab" && (
+                  <MediaField
+                    label="Foto tab ini"
+                    kind="image"
+                    aspect="4/5"
+                    value={t.photo}
+                    onChange={(photo) => update({ photo })}
+                    hint="Tampil tinggi di kanan daftar (desktop) dan melebar di atas daftar (HP), di-crop di tengah. Portrait 4:5 paling aman."
+                  />
+                )}
                 <div className="flex flex-col gap-2">
                   <span className="text-[13px] font-semibold text-ink">Daftar</span>
                   <ListEditor<ToolRow>
@@ -408,6 +433,12 @@ export function ContactEditor({ initial }: { initial: SiteContent["contact"] }) 
         title="Bagian kontak"
         description="Bagian terakhir sebelum footer: judul & teks di kiri, form pesan di kanan. Email dan telepon di sini juga dipakai footer."
       >
+        <div className="flex flex-col gap-1">
+          <Toggle label="Tampilkan form kirim pesan" checked={d.showForm} onChange={(showForm) => set({ showForm })} />
+          <span className="text-[12.5px] text-muted">
+            Kalau dimatikan, form disembunyikan dan judul, email, telepon, serta media sosial mengisi bagian ini. Pesan yang sudah masuk tetap ada di halaman Pesan.
+          </span>
+        </div>
         <TextField label="Judul besar (di kiri form)" value={d.heading} onChange={(heading) => set({ heading })} />
         <TextArea label="Teks di bawah judul" value={d.text} onChange={(text) => set({ text })} rows={3} />
         <div className="grid gap-5 md:grid-cols-2">
@@ -416,11 +447,13 @@ export function ContactEditor({ initial }: { initial: SiteContent["contact"] }) 
         </div>
         <div className="flex flex-col gap-1">
           <Toggle
-            label="Tampilkan ikon media sosial di bawah email & telepon"
+            label="Tampilkan media sosial di bawah email & telepon"
             checked={d.showSocials}
             onChange={(showSocials) => set({ showSocials })}
           />
-          <span className="text-[12.5px] text-muted">Akun media sosialnya diatur di halaman Profil.</span>
+          <span className="text-[12.5px] text-muted">
+            Tampil seperti email & telepon: ikon di kiri, username di kanan. Username dibaca dari URL di halaman Profil.
+          </span>
         </div>
       </Card>
       <SaveBar dirty={ed.dirty} pending={ed.pending} result={ed.result} onSave={ed.save} onReset={ed.reset} />

@@ -8,7 +8,7 @@ export default async function Page() {
     <>
       <PageHeader
         title="Kontak"
-        description={`Bagian “${content.contact.heading}” (menu “Contact” di website): judul, teks, email, telepon, dan ikon media sosial.`}
+        description={`Bagian “${content.contact.heading}” (menu “Contact” di website): judul, teks, email, telepon, media sosial, dan form kirim pesan.`}
       />
       <ContactEditor initial={content.contact} />
     </>

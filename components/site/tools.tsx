@@ -5,28 +5,29 @@ import Image from "next/image";
 import { useState } from "react";
 import { Reveal } from "@/components/fx/reveal";
 import { ImageIcon } from "@/components/icons";
-import type { SiteContent, ToolTab } from "@/lib/content/schema";
+import type { SiteContent } from "@/lib/content/schema";
 import { container } from "./section";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-function Photo({ tab }: { tab: ToolTab }) {
+/** `id` drives the cross-fade: a shared photo keeps one id so switching tabs leaves it still. */
+function Photo({ id, src, label }: { id: string; src: string; label: string }) {
   return (
     <AnimatePresence mode="popLayout" initial={false}>
       <motion.div
-        key={tab.id}
+        key={id}
         initial={{ opacity: 0, scale: 1.06, filter: "blur(12px)" }}
         animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
         exit={{ opacity: 0, scale: 0.98, filter: "blur(8px)" }}
         transition={{ duration: 0.8, ease: EASE }}
         className="absolute inset-0"
       >
-        {tab.photo ? (
-          <Image src={tab.photo} alt={tab.label} fill quality={90} sizes="(min-width: 1080px) 680px, 100vw" className="object-cover" />
+        {src ? (
+          <Image src={src} alt={label} fill quality={90} sizes="(min-width: 1080px) 680px, 100vw" className="object-cover" />
         ) : (
           <div className="flex size-full flex-col items-center justify-center gap-2.5 bg-surface-2 text-muted">
             <ImageIcon size={34} />
-            <span className="text-[13px] font-medium">Foto: {tab.label}</span>
+            <span className="text-[13px] font-medium">Foto: {label}</span>
           </div>
         )}
       </motion.div>
@@ -37,6 +38,7 @@ function Photo({ tab }: { tab: ToolTab }) {
 export function Tools({ tools }: { tools: SiteContent["tools"] }) {
   const [cur, setCur] = useState(tools.tabs[0]?.id);
   const sel = tools.tabs.find((t) => t.id === cur) ?? tools.tabs[0];
+  const shared = tools.photoMode === "shared";
 
   return (
     <section id="tools" aria-labelledby="tools-title" className="relative z-10 py-20 md:py-32">
@@ -89,7 +91,11 @@ export function Tools({ tools }: { tools: SiteContent["tools"] }) {
           </div>
 
           <div className="relative h-[300px] overflow-hidden rounded-[22px] border border-line bg-surface md:col-start-2 md:row-span-2 md:row-start-1 md:h-auto md:rounded-[24px]">
-            <Photo tab={sel} />
+            {shared ? (
+              <Photo id="shared" src={tools.photo} label={tools.heading} />
+            ) : (
+              <Photo id={sel.id} src={sel.photo} label={sel.label} />
+            )}
           </div>
 
           <div

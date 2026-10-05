@@ -89,6 +89,8 @@ export const defaultContent: SiteContent = {
   tools: {
     heading: "Pewujud cerita",
     description: "Alat yang dipakai hampir setiap hari untuk merekam, bicara, dan merakit.",
+    photoMode: "tab",
+    photo: "",
     tabs: [
       {
         id: "alat",
@@ -121,6 +123,7 @@ export const defaultContent: SiteContent = {
     email: "yogaamandaline@gmail.com",
     phone: "0851 8681 5801",
     showSocials: true,
+    showForm: true,
   },
   footer: {
     title: "",

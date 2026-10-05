@@ -8,7 +8,7 @@ export default async function Page() {
     <>
       <PageHeader
         title="Alat & studio"
-        description={`Bagian “${content.tools.heading}” (menu “Tools” di website), sebelum bagian kontak: tab, daftar per tab, dan satu foto per tab.`}
+        description={`Bagian “${content.tools.heading}” (menu “Tools” di website), sebelum bagian kontak: tab, daftar per tab, dan foto (per tab atau satu untuk semua tab).`}
       />
       <ToolsEditor initial={content.tools} />
     </>

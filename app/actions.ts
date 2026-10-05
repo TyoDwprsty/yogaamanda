@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { messageInputSchema } from "@/lib/content/schema";
+import { getContent } from "@/lib/content/store";
 import { addMessage } from "@/lib/messages";
 
 export type ContactState = {
@@ -28,6 +29,11 @@ export async function sendMessage(_prev: ContactState, formData: FormData): Prom
     email: String(formData.get("email") ?? ""),
     note: String(formData.get("note") ?? ""),
   };
+  // A page opened before the admin hid the form can still post; turn those away too.
+  if (!(await getContent()).contact.showForm) {
+    return { status: "error", message: "Form pesan sedang ditutup. Hubungi lewat email atau telepon, ya.", values };
+  }
+
   const parsed = messageInputSchema.safeParse(values);
   if (!parsed.success) {
     const fieldErrors: ContactState["fieldErrors"] = {};
