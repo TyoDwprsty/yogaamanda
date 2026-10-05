@@ -10,7 +10,7 @@ import { container } from "./section";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-/** `id` drives the cross-fade: a shared photo keeps one id so switching tabs leaves it still. */
+/** `id` drives the cross-fade between photos. */
 function Photo({ id, src, label }: { id: string; src: string; label: string }) {
   return (
     <AnimatePresence mode="popLayout" initial={false}>
@@ -37,8 +37,11 @@ function Photo({ id, src, label }: { id: string; src: string; label: string }) {
 
 export function Tools({ tools }: { tools: SiteContent["tools"] }) {
   const [cur, setCur] = useState(tools.tabs[0]?.id);
+  const [rowId, setRowId] = useState<string | null>(null);
   const sel = tools.tabs.find((t) => t.id === cur) ?? tools.tabs[0];
-  const shared = tools.photoMode === "shared";
+  // In "row" mode the photo follows the active row: hovered on desktop, tapped on phones, first row until then.
+  const perRow = sel?.photoMode === "row";
+  const activeRow = perRow ? (sel.items.find((r) => r.id === rowId) ?? sel.items[0]) : undefined;
 
   return (
     <section id="tools" aria-labelledby="tools-title" className="relative z-10 py-20 md:py-32">
@@ -72,7 +75,10 @@ export function Tools({ tools }: { tools: SiteContent["tools"] }) {
                   role="tab"
                   aria-selected={on}
                   aria-controls="tools-panel"
-                  onClick={() => setCur(t.id)}
+                  onClick={() => {
+                    setCur(t.id);
+                    setRowId(null);
+                  }}
                   className={`relative h-12 cursor-pointer rounded-2xl border text-[15px] font-semibold transition-colors duration-500 md:h-14 md:text-base ${
                     on ? "border-transparent text-on-gold" : "border-line bg-surface text-ink hover:border-line-strong"
                   }`}
@@ -91,8 +97,8 @@ export function Tools({ tools }: { tools: SiteContent["tools"] }) {
           </div>
 
           <div className="relative h-[300px] overflow-hidden rounded-[22px] border border-line bg-surface md:col-start-2 md:row-span-2 md:row-start-1 md:h-auto md:rounded-[24px]">
-            {shared ? (
-              <Photo id="shared" src={tools.photo} label={tools.heading} />
+            {activeRow ? (
+              <Photo id={`${sel.id}:${activeRow.id}`} src={activeRow.photo} label={activeRow.label || sel.label} />
             ) : (
               <Photo id={sel.id} src={sel.photo} label={sel.label} />
             )}
@@ -114,20 +120,45 @@ export function Tools({ tools }: { tools: SiteContent["tools"] }) {
                   transition={{ duration: 0.4, ease: EASE }}
                   className="flex flex-col gap-0.5"
                 >
-                  {sel.items.map((row, i) => (
-                    <li
-                      key={row.id}
-                      className="group/row grid grid-cols-[28px_minmax(0,1fr)] items-baseline gap-3 rounded-2xl border border-transparent px-4 py-3.5 transition-[background-color,border-color,transform] duration-500 ease-[var(--ease-lux)] hover:translate-x-1 hover:border-line hover:bg-surface-2"
-                    >
-                      <span className="text-[13px] font-semibold text-muted tabular-nums transition-colors duration-500 group-hover/row:text-gold-text">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <span className="flex flex-col gap-0.5">
-                        {row.label && <span className="text-[17px] font-bold text-ink">{row.label}</span>}
-                        {row.value && <span className="text-[13.5px] font-medium text-muted">{row.value}</span>}
-                      </span>
-                    </li>
-                  ))}
+                  {sel.items.map((row, i) => {
+                    const on = row.id === activeRow?.id;
+                    const body = (
+                      <>
+                        <span
+                          className={`text-[13px] font-semibold tabular-nums transition-colors duration-500 group-hover/row:text-gold-text ${
+                            on ? "text-gold-text" : "text-muted"
+                          }`}
+                        >
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <span className="flex flex-col gap-0.5">
+                          {row.label && <span className="text-[17px] font-bold text-ink">{row.label}</span>}
+                          {row.value && <span className="text-[13.5px] font-medium text-muted">{row.value}</span>}
+                        </span>
+                      </>
+                    );
+                    const cls = `group/row grid w-full grid-cols-[28px_minmax(0,1fr)] items-baseline gap-3 rounded-2xl border px-4 py-3.5 text-left transition-[background-color,border-color,transform] duration-500 ease-[var(--ease-lux)] hover:translate-x-1 hover:border-line hover:bg-surface-2 ${
+                      on ? "translate-x-1 border-line bg-surface-2" : "border-transparent"
+                    }`;
+                    return perRow ? (
+                      <li key={row.id}>
+                        <button
+                          type="button"
+                          aria-pressed={on}
+                          onClick={() => setRowId(row.id)}
+                          onMouseEnter={() => setRowId(row.id)}
+                          onFocus={() => setRowId(row.id)}
+                          className={`${cls} cursor-pointer`}
+                        >
+                          {body}
+                        </button>
+                      </li>
+                    ) : (
+                      <li key={row.id} className={cls}>
+                        {body}
+                      </li>
+                    );
+                  })}
                   {sel.items.length === 0 && <li className="px-4 py-6 text-center text-sm text-muted">Daftar masih kosong.</li>}
                 </motion.ol>
               </AnimatePresence>

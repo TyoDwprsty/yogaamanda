@@ -335,32 +335,9 @@ export function ToolsEditor({ initial }: { initial: SiteContent["tools"] }) {
           <TextField label="Judul besar" value={d.heading} onChange={(heading) => set({ heading })} />
           <TextArea label="Kalimat di bawah judul" value={d.description} onChange={(description) => set({ description })} rows={2} />
         </Card>
-        <Card title="Foto" description="Foto besar di kanan daftar (desktop) dan di atas daftar (HP).">
-          <Segmented
-            label="Pakai foto"
-            value={d.photoMode}
-            onChange={(photoMode) => set({ photoMode })}
-            options={[
-              { value: "tab", label: "Per tab" },
-              { value: "shared", label: "Satu untuk semua tab" },
-            ]}
-          />
-          {d.photoMode === "shared" ? (
-            <MediaField
-              label="Foto untuk semua tab"
-              kind="image"
-              aspect="4/5"
-              value={d.photo}
-              onChange={(photo) => set({ photo })}
-              hint="Tetap di tempat saat tab diganti, hanya daftarnya yang berubah. Di-crop di tengah, portrait 4:5 paling aman."
-            />
-          ) : (
-            <p className="text-[12.5px] text-muted">Foto diatur di masing-masing tab di bawah. Saat tab diganti, fotonya ikut berganti.</p>
-          )}
-        </Card>
         <Card
           title="Tab"
-          description="Tombol di atas daftar (mis. Alat dan Studio). Tiap tab punya daftarnya sendiri. Baris daftar tidak bisa diklik, hanya menyala saat disorot. Tinggi bagian ini tetap: kalau barisnya banyak, daftarnya bisa di-scroll dan foto tidak ikut memanjang."
+          description="Tombol di atas daftar (mis. Alat dan Studio). Tiap tab punya daftarnya sendiri, dan fotonya bisa satu untuk seluruh tab atau satu per baris. Tinggi bagian ini tetap: kalau barisnya banyak, daftarnya bisa di-scroll dan foto tidak ikut memanjang."
         >
           {ed.issue("tabs") && <p className="text-[12.5px] font-medium text-[#e5866b]">{ed.issue("tabs")}</p>}
           <ListEditor<ToolTab>
@@ -368,7 +345,7 @@ export function ToolsEditor({ initial }: { initial: SiteContent["tools"] }) {
             onChange={(tabs) => set({ tabs })}
             max={4}
             addLabel="Tambah tab"
-            create={() => ({ id: newId(), label: "", photo: "", items: [] })}
+            create={() => ({ id: newId(), label: "", photoMode: "tab", photo: "", items: [] })}
             itemLabel={(t, i) => t.label || `Tab ${i + 1}`}
             renderItem={(t, update, i) => (
               <>
@@ -378,7 +355,16 @@ export function ToolsEditor({ initial }: { initial: SiteContent["tools"] }) {
                   onChange={(label) => update({ label })}
                   error={ed.issue(`tabs.${i}.label`)}
                 />
-                {d.photoMode === "tab" && (
+                <Segmented
+                  label="Foto"
+                  value={t.photoMode}
+                  onChange={(photoMode) => update({ photoMode })}
+                  options={[
+                    { value: "tab", label: "Satu untuk tab ini" },
+                    { value: "row", label: "Per baris daftar" },
+                  ]}
+                />
+                {t.photoMode === "tab" ? (
                   <MediaField
                     label="Foto tab ini"
                     kind="image"
@@ -387,6 +373,10 @@ export function ToolsEditor({ initial }: { initial: SiteContent["tools"] }) {
                     onChange={(photo) => update({ photo })}
                     hint="Tampil tinggi di kanan daftar (desktop) dan melebar di atas daftar (HP), di-crop di tengah. Portrait 4:5 paling aman."
                   />
+                ) : (
+                  <p className="text-[12.5px] text-muted">
+                    Foto diisi di tiap baris di bawah. Di website, foto berganti saat baris disorot (desktop) atau ditap (HP); sebelum itu yang tampil foto baris pertama.
+                  </p>
                 )}
                 <div className="flex flex-col gap-2">
                   <span className="text-[13px] font-semibold text-ink">Daftar</span>
@@ -395,18 +385,30 @@ export function ToolsEditor({ initial }: { initial: SiteContent["tools"] }) {
                     onChange={(items) => update({ items })}
                     max={20}
                     addLabel="Tambah baris"
-                    create={() => ({ id: newId(), label: "", value: "" })}
+                    create={() => ({ id: newId(), label: "", value: "", photo: "" })}
                     itemLabel={(r, j) => r.label || `Baris ${j + 1}`}
                     renderItem={(r, updateRow) => (
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <TextField label="Label (tebal)" value={r.label} onChange={(label) => updateRow({ label })} placeholder="Camera" />
-                        <TextField
-                          label="Isi (abu-abu, di bawah label)"
-                          value={r.value}
-                          onChange={(value) => updateRow({ value })}
-                          placeholder="Merek & tipe"
-                        />
-                      </div>
+                      <>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <TextField label="Label (tebal)" value={r.label} onChange={(label) => updateRow({ label })} placeholder="Camera" />
+                          <TextField
+                            label="Isi (abu-abu, di bawah label)"
+                            value={r.value}
+                            onChange={(value) => updateRow({ value })}
+                            placeholder="Merek & tipe"
+                          />
+                        </div>
+                        {t.photoMode === "row" && (
+                          <MediaField
+                            label="Foto baris ini"
+                            kind="image"
+                            aspect="4/5"
+                            value={r.photo}
+                            onChange={(photo) => updateRow({ photo })}
+                            hint="Tampil saat baris ini disorot atau ditap. Portrait 4:5 paling aman."
+                          />
+                        )}
+                      </>
                     )}
                   />
                 </div>

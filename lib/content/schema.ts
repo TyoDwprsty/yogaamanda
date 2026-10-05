@@ -83,11 +83,15 @@ export const toolRowSchema = z.object({
   id,
   label: text(60),
   value: text(160),
+  /** Only shown when the tab's photoMode is "row". */
+  photo: mediaPath.default(""),
 });
 
 export const toolTabSchema = z.object({
   id,
   label: text(40).min(1, "Nama tab wajib diisi"),
+  /** "tab": one photo for the whole tab. "row": each row has its own, shown while that row is active. */
+  photoMode: z.enum(["tab", "row"]).default("tab"),
   photo: mediaPath,
   items: z.array(toolRowSchema).max(20),
 });
@@ -119,9 +123,6 @@ export const toolsSchema = z.preprocess(
   z.object({
     heading: text(80),
     description: text(240),
-    /** "tab" shows each tab's own photo; "shared" shows `photo` for every tab. */
-    photoMode: z.enum(["tab", "shared"]).default("tab"),
-    photo: mediaPath.default(""),
     tabs: z.array(toolTabSchema).min(1, "Minimal satu tab").max(4),
   }),
 );
