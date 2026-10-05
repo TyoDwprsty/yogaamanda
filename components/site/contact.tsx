@@ -104,7 +104,7 @@ export function Contact({ contact, socials }: { contact: SiteContent["contact"];
 
   const links = socials.filter((s) => s.url);
   const showSocials = contact.showSocials && links.length > 0;
-  const hasList = contact.email || contact.phone || showSocials;
+  const hasDirect = !!(contact.email || contact.phone);
 
   const intro = (
     <>
@@ -115,7 +115,7 @@ export function Contact({ contact, socials }: { contact: SiteContent["contact"];
     </>
   );
 
-  const list = hasList && (
+  const direct = hasDirect && (
     <div className="flex flex-col gap-3.5">
       {contact.email && (
         <ContactRow href={`mailto:${contact.email}`} icon={<MailIcon size={18} />}>
@@ -127,31 +127,51 @@ export function Contact({ contact, socials }: { contact: SiteContent["contact"];
           {contact.phone}
         </ContactRow>
       )}
-      {showSocials && (
-        <div className={`flex flex-col gap-3.5 ${contact.email || contact.phone ? "mt-2 border-t border-line pt-6 md:mt-3 md:pt-7" : ""}`}>
-          {links.map((s) => {
-            const Icon = SOCIAL_ICONS[s.platform];
-            return (
-              <ContactRow key={s.id} href={s.url} icon={<Icon size={18} />} label={s.label || undefined} external>
-                {socialHandle(s)}
-              </ContactRow>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 
-  // Without the form, the intro and the contact list sit side by side on desktop.
+  const social = showSocials && (
+    <div className="flex flex-col gap-3.5">
+      {links.map((s) => {
+        const Icon = SOCIAL_ICONS[s.platform];
+        return (
+          <ContactRow key={s.id} href={s.url} icon={<Icon size={18} />} label={s.label || undefined} external>
+            {socialHandle(s)}
+          </ContactRow>
+        );
+      })}
+    </div>
+  );
+
+  // Without the form, the contact details take the form's place: a card on the right with
+  // email & phone and the social accounts as two labelled groups.
   if (!contact.showForm) {
+    const groups = [
+      direct && { title: "Email & telepon", body: direct },
+      social && { title: "Media sosial", body: social },
+    ].filter((g) => !!g);
     return (
       <section
         id="contact"
         aria-labelledby="contact-title"
-        className={`${container} grid grid-cols-1 items-end gap-10 py-20 md:grid-cols-[minmax(0,1fr)_minmax(0,420px)] md:gap-20 md:pt-32 md:pb-36`}
+        className={`${container} grid grid-cols-1 items-start gap-10 py-20 md:grid-cols-[400px_minmax(0,1fr)] md:gap-20 md:pt-32 md:pb-36`}
       >
-        <Reveal className="flex max-w-[560px] flex-col gap-5 md:gap-6">{intro}</Reveal>
-        {list && <Reveal delay={0.1}>{list}</Reveal>}
+        <Reveal className="flex flex-col gap-5 md:gap-6">{intro}</Reveal>
+        {groups.length > 0 && (
+          <Reveal delay={0.1}>
+            <div className="flex flex-col rounded-[22px] border border-line bg-surface p-5 md:rounded-[28px] md:p-10">
+              {groups.map((g, i) => (
+                <div
+                  key={g.title}
+                  className={`flex min-w-0 flex-col gap-4 md:gap-5 ${i > 0 ? "mt-7 border-t border-line pt-7 md:mt-8 md:pt-8" : ""}`}
+                >
+                  <h3 className="text-[13px] font-semibold tracking-[0.14em] text-muted uppercase">{g.title}</h3>
+                  {g.body}
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        )}
       </section>
     );
   }
@@ -164,7 +184,8 @@ export function Contact({ contact, socials }: { contact: SiteContent["contact"];
     >
       <Reveal className="flex flex-col gap-5 md:gap-6">
         {intro}
-        {list && <div className="mt-2 md:mt-4">{list}</div>}
+        {direct && <div className="mt-2 md:mt-4">{direct}</div>}
+        {social && <div className={hasDirect ? "border-t border-line pt-6 md:pt-7" : "mt-2 md:mt-4"}>{social}</div>}
       </Reveal>
 
       <Reveal delay={0.1}>
